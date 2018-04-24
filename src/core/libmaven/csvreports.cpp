@@ -133,7 +133,7 @@ void CSVReports::insertPeakInformationIntoCSVFile(PeakGroup* group) {
 
 void CSVReports::insertGroupInformationIntoCSVFile (PeakGroup* group) {
 
-    if(group->compound == NULL || group->childCount() == 0) {
+    if(group->getCompound() == NULL || group->childCount() == 0) {
 
         writeGroupInfo(group);
 
@@ -141,8 +141,8 @@ void CSVReports::insertGroupInformationIntoCSVFile (PeakGroup* group) {
 
     else {
 
-        string formula = group->compound->formula;
-        int charge = getMavenParameters()->getCharge(group->compound);
+        string formula = group->getCompound()->formula;
+        int charge = getMavenParameters()->getCharge(group->getCompound());
         bool C13Flag = getMavenParameters()->C13Labeled_BPE;
         bool N15Flag = getMavenParameters()->N15Labeled_BPE;
         bool S34Flag = getMavenParameters()->S34Labeled_BPE;
@@ -217,8 +217,8 @@ void CSVReports::insertIsotpesNotFoundInSamples (PeakGroup* group, string isotop
                   << group->metaGroupId << SEP << "N/A" << SEP
                   << "N/A" << SEP << "N/A" << SEP << "N/A" << SEP
                   << "N/A" << SEP << isotopeName << SEP
-                  << group->compound->name << SEP
-                  << group->compound->id << SEP << "N/A" << SEP
+                  << group->getCompound()->name << SEP
+                  << group->getCompound()->id << SEP << "N/A" << SEP
                   << "N/A";
 
        if (group->parent != NULL)
@@ -292,29 +292,29 @@ void CSVReports::writeGroupInfo(PeakGroup* group) {
     float ppmDist = 0;
 
 
-    if (group->compound != NULL) {
-        compoundName = sanitizeString(group->compound->name.c_str()).toStdString();
-        compoundID   = sanitizeString(group->compound->id.c_str()).toStdString();
-        formula = sanitizeString(group->compound->formula.c_str()).toStdString();
-        if (!group->compound->formula.empty()) {
-            int charge = getMavenParameters()->getCharge(group->compound);
+    if (group->getCompound() != NULL) {
+        compoundName = sanitizeString(group->getCompound()->name.c_str()).toStdString();
+        compoundID   = sanitizeString(group->getCompound()->id.c_str()).toStdString();
+        formula = sanitizeString(group->getCompound()->formula.c_str()).toStdString();
+        if (!group->getCompound()->formula.empty()) {
+            int charge = getMavenParameters()->getCharge(group->getCompound());
             if (group->parent != NULL) {
                 ppmDist = mzUtils::massCutoffDist((double) group->getExpectedMz(charge),
                 (double) group->meanMz,getMavenParameters()->massCutoffMerge);
             }
             else {
-                ppmDist = mzUtils::massCutoffDist((double) group->compound->adjustedMass(charge),
+                ppmDist = mzUtils::massCutoffDist((double) group->getCompound()->adjustedMass(charge),
                 (double) group->meanMz,getMavenParameters()->massCutoffMerge);
             }
         }
         else {
-            ppmDist = mzUtils::massCutoffDist((double) group->compound->mass, (double) group->meanMz,getMavenParameters()->massCutoffMerge);
+            ppmDist = mzUtils::massCutoffDist((double) group->getCompound()->mass, (double) group->meanMz,getMavenParameters()->massCutoffMerge);
         }
         expectedRtDiff = group->expectedRtDiff;
 
         // TODO: Added this while merging this file
-        //for(int i=0;i<group->compound->category.size(); i++) {
-        //    categoryString += group->compound->category[i] + ";";
+        //for(int i=0;i<group->getCompound()->category.size(); i++) {
+        //    categoryString += group->getCompound()->category[i] + ";";
         //}
         //categoryString=sanitizeString(categoryString.c_str()).toStdString();
 
@@ -355,10 +355,11 @@ void CSVReports::writePeakInfo(PeakGroup* group) {
     string compoundName = "";
     string compoundID = "";
     string formula = "";
-    if (group->compound != NULL) {
-        compoundName = sanitizeString(group->compound->name.c_str()).toStdString();
-        compoundID   = sanitizeString(group->compound->id.c_str()).toStdString();
-        formula = sanitizeString(group->compound->formula.c_str()).toStdString();
+
+    if (group->getCompound() != NULL) {
+        compoundName = sanitizeString(group->getCompound()->name.c_str()).toStdString();
+        compoundID   = sanitizeString(group->getCompound()->id.c_str()).toStdString();
+        formula = sanitizeString(group->getCompound()->formula.c_str()).toStdString();
     }
 
     if (selectionFlag == 2) {

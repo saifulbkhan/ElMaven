@@ -28,8 +28,8 @@ void Aligner::preProcessing(vector<PeakGroup*>& peakgroups, bool alignWrtExpecte
 
         QJsonObject expectedRtObj;
         QString expectedRtKey="expectedRt";
-        if(alignWrtExpectedRt && grp->compound!=NULL){
-            expectedRtObj.insert(expectedRtKey,grp->compound->expectedRt);
+        if(alignWrtExpectedRt && grp->getCompound() != NULL){
+            expectedRtObj.insert(expectedRtKey,grp->getCompound()->expectedRt);
         }
         else{
             expectedRtObj.insert(expectedRtKey,-1);

@@ -385,7 +385,7 @@ void TableDockWidget::updateCompoundWidget() {
             PeakGroup* group =  v.value<PeakGroup*>();
             if ( group == NULL ) continue;
 
-            _mainwindow->ligandWidget->markAsDone(group->compound);
+            _mainwindow->ligandWidget->markAsDone(group->getCompound());
         }
         ++itr;
     }
@@ -450,7 +450,7 @@ void TableDockWidget::addRow(PeakGroup* group, QTreeWidgetItem* root) {
     item->setText(0,QString::number(group->groupId));
     item->setText(1,QString(group->getName().c_str()));
     item->setText(2,QString::number(group->meanMz, 'f', 4));
-    int charge = _mainwindow->mavenParameters->getCharge(group->compound);
+    int charge = _mainwindow->mavenParameters->getCharge(group->getCompound());
 
     if (group->getExpectedMz(charge) != -1) {
         float mz = group->getExpectedMz(charge);
@@ -1621,7 +1621,7 @@ void TableDockWidget::findMatchingCompounds() {
     float ionizationMode = _mainwindow->mavenParameters->ionizationMode;
     for(int i=0; i < allgroups.size(); i++ ) {
         PeakGroup& g = allgroups[i];
-        int charge = _mainwindow->mavenParameters->getCharge(g.compound);
+        int charge = _mainwindow->mavenParameters->getCharge(g.getCompound());
         QSet<Compound*>compounds = _mainwindow->massCalcWidget->findMathchingCompounds(g.meanMz, massCutoff, 
                     charge);
         if (compounds.size() > 0 ) Q_FOREACH( Compound*c, compounds) { g.tagString += " |" + c->name; break; }
@@ -1712,7 +1712,7 @@ void TableDockWidget::writeGroupXML(QXmlStreamWriter& stream, PeakGroup* g) {
 
     //for sample contrasts  ratio and pvalue
     if ( g->hasCompoundLink() ) {
-        Compound* c = g->compound;
+        Compound* c = g->getCompound();
 		stream.writeAttribute("compoundId",  QString(c->id.c_str()));
         stream.writeAttribute("compoundDB",  QString(c->db.c_str()) );
 		stream.writeAttribute("compoundName",  QString(c->name.c_str()));
@@ -1832,13 +1832,13 @@ PeakGroup* TableDockWidget::readGroupXML(QXmlStreamReader& xml,PeakGroup* parent
 
     if (!compoundName.empty() && !compoundDB.empty()) {
 		vector<Compound*>matches = DB.findSpeciesByName(compoundName,compoundDB);
-		if (matches.size()>0) g.compound = matches[0];
+		if (matches.size()>0) g.setCompound(matches[0]);
     } else if (!compoundId.empty()){
           Compound* c = DB.findSpeciesById(compoundId,DB.ANYDATABASE);
-         if (c) g.compound = c;
+         if (c) g.setCompound(c);
     }
 
-    if (!g.compound) {
+    if (!g.getCompound()) {
         if (!compoundId.empty()) g.tagString=compoundId;
         else if (!compoundName.empty()) g.tagString=compoundName;
     }

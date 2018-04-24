@@ -113,7 +113,7 @@ void HeatMap::drawMap() {
                 item->setFlag(QGraphicsItem::ItemIsSelectable);
             }
 
-            Compound* c  = group->compound;
+            Compound* c  = group->getCompound();
             if ( c != NULL) {
                 QGraphicsTextItem* item = scene()->addText(QString(c->name.c_str()));
                 int textWidth = item->boundingRect().width();

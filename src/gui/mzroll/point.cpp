@@ -225,7 +225,7 @@ void EicPoint::setClipboardToGroup() { if(_group) _mw->setClipboardToGroup(_grou
 void EicPoint::bookmark() { if(_group) _mw->bookmarkPeakGroup(_group); }
 
 void EicPoint::setClipboardToIsotopes() {
-    if (_group &&_group->compound != NULL && ! _group->compound->formula.empty() )  {
+    if (_group &&_group->getCompound() != NULL && ! _group->getCompound()->formula.empty() )  {
         _mw->isotopeWidget->updateIsotopicBarplot(_group);
         _mw->isotopeWidget->setPeakGroupAndMore(_group, true);
         if (_peak)
@@ -234,19 +234,19 @@ void EicPoint::setClipboardToIsotopes() {
 }
 
 void EicPoint::linkCompound() {
-    if (_group &&_group->compound != NULL )  {
+    if (_group &&_group->getCompound() != NULL )  {
             //link group to compound
-            _group->compound->setPeakGroup(*_group);
+            _group->getCompound()->setPeakGroup(*_group);
 
             //update compound retention time
-            if (_peak) _group->compound->expectedRt=_peak->rt;
+            if (_peak) _group->getCompound()->expectedRt=_peak->rt;
 
             //log information about retention time change
            // _mw->getEicWidget()->addNote(_peak->peakMz,_peak->peakIntensity, "Compound Link");
             _mw->getEicWidget()->saveRetentionTime();
 
             //upadte ligand widget
-            QString dbname(_group->compound->db.c_str());
+            QString dbname(_group->getCompound()->db.c_str());
             _mw->ligandWidget->setDatabaseAltered(dbname,true);
             //_mw->ligandWidget->updateTable();
             _mw->ligandWidget->updateCurrentItemData();
@@ -265,8 +265,8 @@ void EicPoint::contextMenuEvent ( QGraphicsSceneMouseEvent* event ) {
     c1->setIcon(QIcon(rsrcPath + "/copyCSV.png"));
     connect(c1, SIGNAL(triggered()), SLOT(setClipboardToGroup()));
 
-    if (_group && _group->compound ) {
-       if ( _group->isIsotope() == false && !_group->compound->formula.empty() ) {
+    if (_group && _group->getCompound() ) {
+       if ( _group->isIsotope() == false && !_group->getCompound()->formula.empty() ) {
             QAction* z = menu.addAction("Copy Isotope Information to Clipboard");
             z->setIcon(QIcon(rsrcPath + "/copyCSV.png"));
             connect(z, SIGNAL(triggered()), SLOT(setClipboardToIsotopes()));

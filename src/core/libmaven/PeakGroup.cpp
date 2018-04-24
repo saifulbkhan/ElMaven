@@ -55,7 +55,7 @@ PeakGroup::PeakGroup()  {
 
     parent = NULL;
     //adduct = NULL;
-    compound = NULL;
+    slice = NULL;
 
     isFocused=false;
     label=0;    //classification label
@@ -119,7 +119,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     maxMz=o.maxMz;
 
     parent = o.parent;
-    compound = o.compound;
+    slice = o.slice;
 
     srmId=o.srmId;
     isFocused=o.isFocused;
@@ -146,7 +146,7 @@ void PeakGroup::copyChildren(const PeakGroup& o) {
 }
 
 bool PeakGroup::isPrimaryGroup() {
-    if(compound && compound->getPeakGroup() == this) return true;
+    if(slice != NULL && slice->compound != NULL && slice->compound->getPeakGroup() == this) return true;
     return false;
 }
 
@@ -417,20 +417,26 @@ double PeakGroup::getExpectedMz(int charge) {
 
     float mz = 0;
 
-    if (isIsotope() && childCount() == 0 && compound && !compound->formula.empty() && compound->mass > 0) { 
+    if (isIsotope() 
+        && childCount() == 0 
+        && slice != NULL 
+        && slice->compound != NULL 
+        && !slice->compound->formula.empty() 
+        && slice->compound->mass > 0
+    ) { 
         return expectedMz;
     }
-    else if (!isIsotope() && compound && compound->mass > 0) {
-        if (!compound->formula.empty()) {
-            mz = compound->adjustedMass(charge);
+    else if (!isIsotope() && slice != NULL && slice->compound != NULL && slice->compound->mass > 0) {
+        if (!slice->compound->formula.empty()) {
+            mz = slice->compound->adjustedMass(charge);
         } else {
-            mz = compound->mass;
+            mz = slice->compound->mass;
         }
 
         return mz;
     }
-    else if (compound && compound->mass == 0 && compound->productMz > 0) {
-        mz = compound->productMz;
+    else if (slice != NULL && slice->compound != NULL && slice->compound->mass == 0 && slice->compound->productMz > 0) {
+        mz = slice->compound->productMz;
         return mz;
     }
 
@@ -624,7 +630,7 @@ void PeakGroup::reorderSamples() {
 string PeakGroup::getName() {
     string tag;
     //compound is assigned in case of targeted search
-    if (compound) tag = compound->name;
+    if (slice != NULL && slice->compound != NULL) tag = slice->compound->name;
     //add isotopic label
     if (!tagString.empty()) tag += " | " + tagString;
     //add SRM ID for MS/MS data 
@@ -757,9 +763,9 @@ void PeakGroup::calGroupRank(bool deltaRtCheckFlag,
 
     float rtDiff = -1;
 
-    if (compound != NULL && compound->expectedRt > 0)
+    if (slice != NULL && slice->compound != NULL && slice->compound->expectedRt > 0)
     {
-        rtDiff = abs(compound->expectedRt - (meanRt));
+        rtDiff = abs(slice->compound->expectedRt - (meanRt));
         expectedRtDiff = rtDiff;
     }
 
@@ -768,7 +774,7 @@ void PeakGroup::calGroupRank(bool deltaRtCheckFlag,
     double B = (double) intensityWeight/10;
     double C = (double) deltaRTWeight/10;
 
-    if (deltaRtCheckFlag && compound != NULL && compound->expectedRt > 0) {
+    if (deltaRtCheckFlag && slice != NULL && slice->compound != NULL && slice->compound->expectedRt > 0) {
         groupRank = pow(rtDiff, 2*C) * pow((1.1 - maxQuality), A)
                                 * (1 /( pow(log(maxIntensity + 1), B))); //TODO Formula to rank groups
     } else {

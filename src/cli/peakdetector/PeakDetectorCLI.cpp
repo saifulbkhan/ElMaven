@@ -1010,7 +1010,7 @@ void PeakDetectorCLI::writeGroupXML(xml_node& parent, PeakGroup* g) {
 		group.append_attribute("srmId") = g->srmId.c_str();
 
 	if (g->hasCompoundLink()) {
-		Compound* c = g->compound;
+		Compound* c = g->getCompound();
 		group.append_attribute("compoundId") = c->id.c_str();
 		group.append_attribute("compoundDB") = c->db.c_str();
 	}

@@ -9,10 +9,12 @@
 #include "Peak.h"
 #include "Scan.h"
 #include "mzSample.h"
+#include "datastructures/mzSlice.h"
 #include "mzMassCalculator.h"
 #include <vector>
 
 class mzSample;
+class mzSlice;
 class Isotope;
 class MassCalculator;
 class Compound;
@@ -23,6 +25,9 @@ class EIC;
 using namespace std;
 
 class PeakGroup{
+
+    private:
+        mzSlice* slice;
 
     public:
         enum GroupType {None=0, C13=1, Adduct=2, Fragment=3, Covariant=4, Isotope=5 };     //group types
@@ -56,7 +61,6 @@ class PeakGroup{
         ~PeakGroup();
 
         PeakGroup* parent;
-        Compound* compound;
 
         vector<Peak> peaks;
         vector<PeakGroup> children;
@@ -156,8 +160,7 @@ class PeakGroup{
          * @return []
          */
         inline  string getSrmId() const { return srmId; }
-
-
+    
         /**
          * [isPrimaryGroup ]
          * @method isPrimaryGroup
@@ -170,7 +173,7 @@ class PeakGroup{
          * @method hasCompoundLink
          * @return []
          */
-        inline bool hasCompoundLink() const  { if(compound != NULL) return true ; return false; }
+        inline bool hasCompoundLink() const  { if(slice != NULL && slice->compound != NULL) return true ; return false; }
 
         /**
          * [isEmpty ]
@@ -202,7 +205,22 @@ class PeakGroup{
          * @method getCompound
          * @return []
          */
-        inline Compound* getCompound() { return compound; }
+        inline Compound* getCompound()
+        {
+            if (slice != NULL) {
+                return slice->compound;
+            }
+            return NULL;
+        }
+
+        void setCompound(Compound* compound)
+        {
+            if (slice == NULL) {
+                slice = new mzSlice();
+            }
+
+            slice->compound = compound;
+        }
 
         /**
          * [getParent ]

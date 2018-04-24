@@ -49,7 +49,7 @@ bool GroupFiltering::filter(PeakGroup &peakgroup)
         return true;
 
     if (compound)
-        peakgroup.compound = compound;
+        peakgroup.setCompound(compound);
     if (!_slice->srmId.empty())
         peakgroup.srmId = _slice->srmId;
 
