@@ -162,13 +162,6 @@ class PeakGroup{
         inline  string getSrmId() const { return srmId; }
     
         /**
-         * [isPrimaryGroup ]
-         * @method isPrimaryGroup
-         * @return []
-         */
-        bool isPrimaryGroup();
-
-        /**
          * [hasCompoundLink ]
          * @method hasCompoundLink
          * @return []

@@ -145,11 +145,6 @@ void PeakGroup::copyChildren(const PeakGroup& o) {
     for(unsigned int i=0; i < children.size(); i++ ) children[i].parent = this;
 }
 
-bool PeakGroup::isPrimaryGroup() {
-    if(slice != NULL && slice->compound != NULL && slice->compound->getPeakGroup() == this) return true;
-    return false;
-}
-
 void PeakGroup::clear() {
     deletePeaks();
     deleteChildren();
