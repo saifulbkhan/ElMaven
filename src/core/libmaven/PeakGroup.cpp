@@ -55,7 +55,7 @@ PeakGroup::PeakGroup()  {
 
     parent = NULL;
     //adduct = NULL;
-    slice = NULL;
+    _slice = NULL;
 
     isFocused=false;
     label=0;    //classification label
@@ -119,7 +119,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     maxMz=o.maxMz;
 
     parent = o.parent;
-    slice = o.slice;
+    _slice = o._slice;
 
     srmId=o.srmId;
     isFocused=o.isFocused;
@@ -151,6 +151,14 @@ void PeakGroup::clear() {
     meanMz  = 0;
     expectedMz = 0;
     groupRank=INT_MAX;
+}
+
+void PeakGroup::setSlice(mzSlice* slice) {
+    this->_slice = slice;
+}
+
+mzSlice* PeakGroup::getSlice() {
+    return this->_slice;
 }
 
 //TODO: a duplicate function getPeak exists. Delete this function
@@ -414,24 +422,24 @@ double PeakGroup::getExpectedMz(int charge) {
 
     if (isIsotope() 
         && childCount() == 0 
-        && slice != NULL 
-        && slice->compound != NULL 
-        && !slice->compound->formula.empty() 
-        && slice->compound->mass > 0
+        && _slice != NULL 
+        && _slice->compound != NULL 
+        && !_slice->compound->formula.empty() 
+        && _slice->compound->mass > 0
     ) { 
         return expectedMz;
     }
-    else if (!isIsotope() && slice != NULL && slice->compound != NULL && slice->compound->mass > 0) {
-        if (!slice->compound->formula.empty()) {
-            mz = slice->compound->adjustedMass(charge);
+    else if (!isIsotope() && _slice != NULL && _slice->compound != NULL && _slice->compound->mass > 0) {
+        if (!_slice->compound->formula.empty()) {
+            mz = _slice->compound->adjustedMass(charge);
         } else {
-            mz = slice->compound->mass;
+            mz = _slice->compound->mass;
         }
 
         return mz;
     }
-    else if (slice != NULL && slice->compound != NULL && slice->compound->mass == 0 && slice->compound->productMz > 0) {
-        mz = slice->compound->productMz;
+    else if (_slice != NULL && _slice->compound != NULL && _slice->compound->mass == 0 && _slice->compound->productMz > 0) {
+        mz = _slice->compound->productMz;
         return mz;
     }
 
@@ -625,7 +633,7 @@ void PeakGroup::reorderSamples() {
 string PeakGroup::getName() {
     string tag;
     //compound is assigned in case of targeted search
-    if (slice != NULL && slice->compound != NULL) tag = slice->compound->name;
+    if (_slice != NULL && _slice->compound != NULL) tag = _slice->compound->name;
     //add isotopic label
     if (!tagString.empty()) tag += " | " + tagString;
     //add SRM ID for MS/MS data 
@@ -642,10 +650,6 @@ string PeakGroup::getName() {
     return tag;
 }
 
-/*
-@author: Sahil, Kiran
-*/
-//TODO: Sahil - Kiran, Added while merging mainwindow
 vector<Scan*> PeakGroup::getRepresentativeFullScans() {
     vector<Scan*>matchedscans;
     for(unsigned int i=0; i < peaks.size(); i++ ) {
@@ -657,10 +661,6 @@ vector<Scan*> PeakGroup::getRepresentativeFullScans() {
     return matchedscans;
 }
 
-/*
-   @author: Sahil
-   */ 
-//TODO: Sahil, Added while merging Spectrawidget
 vector<Scan*> PeakGroup::getFragmenationEvents() {
     vector<Scan*>matchedscans;
     for(unsigned int i=0; i < peaks.size(); i++ ) {
@@ -758,9 +758,9 @@ void PeakGroup::calGroupRank(bool deltaRtCheckFlag,
 
     float rtDiff = -1;
 
-    if (slice != NULL && slice->compound != NULL && slice->compound->expectedRt > 0)
+    if (_slice != NULL && _slice->compound != NULL && _slice->compound->expectedRt > 0)
     {
-        rtDiff = abs(slice->compound->expectedRt - (meanRt));
+        rtDiff = abs(_slice->compound->expectedRt - (meanRt));
         expectedRtDiff = rtDiff;
     }
 
@@ -769,7 +769,7 @@ void PeakGroup::calGroupRank(bool deltaRtCheckFlag,
     double B = (double) intensityWeight/10;
     double C = (double) deltaRTWeight/10;
 
-    if (deltaRtCheckFlag && slice != NULL && slice->compound != NULL && slice->compound->expectedRt > 0) {
+    if (deltaRtCheckFlag && _slice != NULL && _slice->compound != NULL && _slice->compound->expectedRt > 0) {
         groupRank = pow(rtDiff, 2*C) * pow((1.1 - maxQuality), A)
                                 * (1 /( pow(log(maxIntensity + 1), B))); //TODO Formula to rank groups
     } else {
