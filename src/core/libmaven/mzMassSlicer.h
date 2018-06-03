@@ -64,7 +64,7 @@ class MassSlices {
          * @param userPPM      The user defined PPM for MZ range
          * @param rtStep       Minimum RT range for RT window
          */
-        void algorithmB( MassCutoff *massCutoff, int step);
+        void algorithmB( MassCutoff *massCutoff, int step, float overlapThreshold);
 
 
         void algorithmC(float ppm, float minIntensity, float rtStep);

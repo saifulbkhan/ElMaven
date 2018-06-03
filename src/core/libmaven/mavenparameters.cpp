@@ -42,6 +42,7 @@ MavenParameters::MavenParameters(string settingsPath):lastUsedSettingsPath(setti
         massCutoffMerge = new MassCutoff();
         massCutoffMerge->setMassCutoff(30);
         avgScanTime = 0.2;
+        overlapThreshold = 100.0;
 
         limitGroupCount = INT_MAX;
 
@@ -199,6 +200,9 @@ void  MavenParameters::setPeakDetectionSettings(const char* key, const char* val
 
     if(strcmp(key,"rtStep") == 0)
         rtStepSize = atof(value);
+    
+    if(strcmp(key, "overlapThreshold") == 0)
+        overlapThreshold = atof(value);
 
     if(strcmp(key,"mzMin") == 0)
         minMz = atof(value);
@@ -536,6 +540,7 @@ void MavenParameters::printSettings() {
         cerr << "#showProgressFlag=" << showProgressFlag << endl;
 
         cerr << "#rtStepSize=" << rtStepSize << endl;
+        cerr << "#overlapThreshold=" << overlapThreshold << endl;
         cerr << "#massCutoffMerge=" << massCutoffMerge->getMassCutoff() << endl;
         cerr << "#avgScanTime=" << avgScanTime << endl;
 

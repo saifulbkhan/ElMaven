@@ -678,6 +678,7 @@ void MainWindow::saveSettingsToLog() {
 
     summary << "--------------------------------MASS SLICING"<< "\n";
     summary << "rtStepSize=" << mavenParameters->rtStepSize<< "\n";
+	summary << "overlapThreshold=" << mavenParameters->overlapThreshold << "\n";
     summary << "massCutoffMerge=" << mavenParameters->massCutoffMerge->getMassCutoff()<< "\n";
     summary << "limitGroupCount=" << mavenParameters->limitGroupCount<< "\n";
 
@@ -2830,6 +2831,7 @@ void MainWindow::Align() {
 	mavenParameters->rtStepSize =
 			alignmentDialog->groupingWindow->value(); //TODO: Sahil-Kiran, Added while merging mainwindow
 
+	mavenParameters->overlapThreshold = peakDetectionDialog->overlapThreshold->value();
 	mavenParameters->minSignalBaseLineRatio = alignmentDialog->minSN->value();
 	mavenParameters->minNoNoiseObs = alignmentDialog->minPeakWidth->value();
 

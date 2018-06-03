@@ -85,13 +85,6 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="2">
-           <widget class="QRadioButton" name="ignoreIsotopes">
-            <property name="text">
-             <string>Auto Detect And Ignore Isotopes</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="ppmStep">
             <property name="decimals">
@@ -224,6 +217,23 @@
            <widget class="QLabel" name="label_18">
             <property name="text">
              <string>Limit Time Range</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Overlap threshold</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="overlapThreshold">
+            <property name="maximum">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>100.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -1007,7 +1017,6 @@
   <tabstop>rtStep</tabstop>
   <tabstop>rtMin</tabstop>
   <tabstop>rtMax</tabstop>
-  <tabstop>ignoreIsotopes</tabstop>
   <tabstop>minIntensity</tabstop>
   <tabstop>maxIntensity</tabstop>
   <tabstop>chargeMin</tabstop>

@@ -51,7 +51,7 @@ void MassSlices::stopSlicing() {
  * @param userPPM      The user defined PPM for MZ range
  * @param rtStep       Minimum RT range for RT window
  */
-void MassSlices::algorithmB( MassCutoff *massCutoff,int rtStep ) {
+void MassSlices::algorithmB( MassCutoff *massCutoff,int rtStep, float overlapThreshold ) {
     //clear all previous data
     delete_all(slices);
     slices.clear();
@@ -119,7 +119,11 @@ void MassSlices::algorithmB( MassCutoff *massCutoff,int rtStep ) {
 
                 // Checking if mz, intensity and charge are within specified range
                 if (_maxMz and !isBetweenInclusive(scan->mz[k],_minMz,_maxMz)) continue;
-                if (_maxIntensity and !isBetweenInclusive(scan->intensity[k],_minIntensity,_maxIntensity)) continue;
+                if (_maxIntensity and !isBetweenInclusive(scan->intensity[k],_minIntensity,_maxIntensity)) 
+                {
+                    cerr << "intensity: " << scan->intensity[k] << endl;
+                    continue;
+                }
                 if ((_minCharge or _maxCharge) and !isBetweenInclusive(charges[k],_minCharge,_maxCharge)) continue;
 
                 // Define mz max and min for this slice
@@ -170,7 +174,7 @@ void MassSlices::algorithmB( MassCutoff *massCutoff,int rtStep ) {
         }
     }
     cerr << "Found=" << slices.size() << " slices" << endl;
-    float threshold = 100;
+    float threshold = overlapThreshold;
     removeDuplicateSlices(massCutoff, threshold);
     sort(slices.begin(),slices.end(), mzSlice::compIntensity);
     cerr << "After removing duplicate slices. Threshold : "<< threshold <<", Found="<< slices.size()<< " slices" <<endl;

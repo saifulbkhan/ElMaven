@@ -126,6 +126,7 @@ class MavenParameters
         float rtStepSize;
         float avgScanTime;
         MassCutoff *massCutoffMerge;
+        float overlapThreshold;
 
         //peak detection
 

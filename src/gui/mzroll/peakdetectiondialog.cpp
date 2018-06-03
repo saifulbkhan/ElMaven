@@ -11,6 +11,7 @@ PeakDetectionSettings::PeakDetectionSettings(PeakDetectionDialog* dialog):pd(dia
     settings.insert("massCutoffMerge", QVariant::fromValue(pd->ppmStep));
 
     settings.insert("rtStep", QVariant::fromValue(pd->rtStep));
+    settings.insert("overlapThreshold", QVariant::fromValue(pd->overlapThreshold));
     settings.insert("mzMin", QVariant::fromValue(pd->mzMin));
     settings.insert("mzMax", QVariant::fromValue(pd->mzMax));
     settings.insert("rtMin", QVariant::fromValue(pd->rtMin));

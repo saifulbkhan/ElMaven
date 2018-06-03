@@ -4,6 +4,7 @@
         <massCutoffType>ppm</massCutoffType>
         <massCutoffMerge>20</massCutoffMerge>
         <rtStep>10</rtStep>
+        <overlapThreshold>100</overlapThreshold>
         <mzMin>0</mzMin>
         <mzMax>1000000000.00</mzMax>
         <rtMin>0.00</rtMin>

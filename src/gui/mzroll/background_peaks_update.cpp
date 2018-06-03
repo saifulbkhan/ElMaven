@@ -39,6 +39,7 @@ QString BackgroundPeakUpdate::printSettings() {
 
     summary << "--------------------------------MASS SLICING"<< "\n";
     summary << "rtStepSize=" << mavenParameters->rtStepSize<< "\n";
+    summary << "overlapThreshold=" << mavenParameters->overlapThreshold << "\n";
     summary << "massCutoffMerge=" << mavenParameters->massCutoffMerge->getMassCutoff()<< "\n";
     summary << "limitGroupCount=" << mavenParameters->limitGroupCount<< "\n";
 
@@ -123,6 +124,7 @@ void BackgroundPeakUpdate::saveSettings(QString fileName) {
     stream.writeAttribute( "alignSamplesFlag"  ,   QString::number(mavenParameters->alignSamplesFlag));
 
     stream.writeAttribute( "rtStepSize" ,QString::number( mavenParameters->rtStepSize));
+    stream.writeAttribute( "overlapThreshold" ,QString::number(mavenParameters->overlapThreshold));
     stream.writeAttribute( "massCutoffMerge" ,QString::number( mavenParameters->massCutoffMerge->getMassCutoff()));
     stream.writeAttribute( "limitGroupCount" ,QString::number( mavenParameters->limitGroupCount));
 

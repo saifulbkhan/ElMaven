@@ -171,7 +171,8 @@ void PeakDetector::processMassSlices() {
     massSlices.setMinRt (mavenParameters->minRt);
     massSlices.setMaxMz (mavenParameters->maxMz);
     massSlices.setMinMz	(mavenParameters->minMz);
-    massSlices.algorithmB(mavenParameters->massCutoffMerge, mavenParameters->rtStepSize);  // perform algorithmB for samples
+    massSlices.algorithmB(mavenParameters->massCutoffMerge, mavenParameters->rtStepSize,
+       mavenParameters->overlapThreshold);  // perform algorithmB for samples
 
     if (massSlices.slices.size() == 0)
         massSlices.algorithmA();  // if no slices present, perform algorithmA
