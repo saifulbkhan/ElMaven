@@ -53,10 +53,17 @@ LigandWidget::LigandWidget(MainWindow* mw) {
 
 
   saveButton->setEnabled(false);
+  
+  amuList=new QComboBox(toolBar);
+  amuList->addItem("amu");
+  amuList->addItem("mim");
+  amuList->setToolTip("Select mass type");
+
 
   toolBar->addWidget(databaseSelect);
   toolBar->addWidget(loadButton);
   toolBar->addWidget(saveButton);
+  toolBar->addWidget(amuList);
 //   toolBar->addWidget(galleryButton);
 
   //Feature updated when merging with Maven776- Filter out compounds based on a keyword.

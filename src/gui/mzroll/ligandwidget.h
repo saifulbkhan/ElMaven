@@ -106,6 +106,7 @@ private:
 
     QTreeWidget *treeWidget;
     QComboBox *databaseSelect;
+    QComboBox *amuList;
     QToolButton *galleryButton;
     QToolButton *saveButton;
     QToolButton *loadButton;
