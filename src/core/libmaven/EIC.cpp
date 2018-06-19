@@ -124,8 +124,52 @@ EIC *EIC::eicMerge(const vector<EIC *> &eics)
     return meic;
 }
 
+vector<sparseRepresent> EIC::sparseRepresentation(float** a,int row, int col){
+    vector<sparseRepresent> sparseMatrix;
+    sparseRepresent temp;
+    for(int i=0;i<row;i++){
+        for(int j=0;j<col;j++){
+            if(a[i][j]!=0){
+                temp.i=i;
+                temp.j=j;
+                temp.data=a[i][j];
+                sparseMatrix.push_back(temp);
+            }
+        }
+    }
+    return sparseMatrix;
+}
+
+vector<sparseRepresent> EIC::zeroDiagSparse(float a[], int n){
+    vector<sparseRepresent> sparseMatrix;
+    sparseRepresent temp;
+    for (int i=0;i<n;i++){
+        temp.i=i;
+        temp.j=i;
+        temp.data=a[i];
+        sparseMatrix.push_back(temp);
+    }
+    return sparseMatrix;
+
+}
+void EIC::discreteMatrixDifference(float** a,int row, int column, int n){
+    if(n==0){
+        return;
+    }
+    // TODO: check for the number of columns if column < n
+    // float returnMat[row][column-1];
+    for(int i=0;i<row;i++){
+        for(int j=0;j<column-1;j++){
+            a[i][j]=a[i][j+1]-a[i][j];
+        }
+    }
+    return discreteMatrixDifference(a, row, column-1, n-1);
+}
+
+
 void EIC::computeBaseLine(int smoothing_window, int dropTopX)
 {
+    cerr << "baseline" << endl;
     if (baseline != NULL)
     { //delete previous baseline if exists
         delete[] baseline;
@@ -133,7 +177,48 @@ void EIC::computeBaseLine(int smoothing_window, int dropTopX)
         eic_noNoiseObs = 0;
     }
 
+    const float lam=1000;
+    const float p=0.01;
+    int L=intensity.size();
+    float** computationMatrix;
+    computationMatrix=new float* [L];
+    for(int i=0;i<L;i++){
+        computationMatrix[i]=new float[L];
+    }
+    for(int i=0;i<L;i++){
+        for(int j=0;j<L;j++){
+            if(i==j){
+                computationMatrix[i][j]=1;
+            }
+            else{
+                computationMatrix[i][j]=0;
+            }
+        }
+    }
+    int numRows=L;
+    int numColumns=L;
+    discreteMatrixDifference(computationMatrix,numRows, numColumns, 2);
+    // TODO: check for negative value of column if L<=2
+    numColumns-=2;
+    vector<sparseRepresent> sparse_matrix=sparseRepresentation(computationMatrix, numRows, numColumns);
+    float w[L];
+    for(int i=0;i<L;i++){
+        w[i]=1;
+    }
+    vector<sparseRepresent> zeroDiagMatrix;
+    for(int i=0;i<smoothing_window;i++){
+        zeroDiagMatrix=zeroDiagSparse(w,L);
+        
+    }
+
+
+
+
+
+
+    /*
     int n = intensity.size();
+    cerr << n << endl;
     if (n == 0)
         return;
 
@@ -188,6 +273,8 @@ void EIC::computeBaseLine(int smoothing_window, int dropTopX)
     }
     //cerr << "eic size = " << n << "\n";
     //cerr << "eic no noise obs = " << eic_noNoiseObs << "\n";
+
+    */
 }
 
 void EIC::subtractBaseLine()

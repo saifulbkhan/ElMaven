@@ -40,6 +40,11 @@ class EIC
         MAX = 0,
         SUM = 1
     };
+    struct sparseRepresent{
+        int i;
+        int j;
+        int data;
+    };
 
     vector<int> scannum;     /**< Store all scan numbers in an EIC */
     vector<float> rt;        /**< Store all retention times in an EIC */
