@@ -165,7 +165,18 @@ void EIC::discreteMatrixDifference(float** a,int row, int column, int n){
     }
     return discreteMatrixDifference(a, row, column-1, n-1);
 }
-
+// Matrix square D*D.T
+vector<sparseRepresent> EIC::matrixTranspose(vector<sparseRepresent> mat1){
+    vector<sparseRepresent> D=mat1;
+    vector<sparseRepresent> Dt;
+    for(int i=0;i<mat1.size();i++){
+        int temp=D[i].i;
+        D[i].i=D[i].j;
+        D[i].j=temp;
+        Dt.push_back(D[i]);
+    }
+    return Dt;
+}
 
 void EIC::computeBaseLine(int smoothing_window, int dropTopX)
 {
@@ -208,7 +219,6 @@ void EIC::computeBaseLine(int smoothing_window, int dropTopX)
     vector<sparseRepresent> zeroDiagMatrix;
     for(int i=0;i<smoothing_window;i++){
         zeroDiagMatrix=zeroDiagSparse(w,L);
-        
     }
 
 
