@@ -140,18 +140,15 @@ vector<sparseRepresent> EIC::sparseRepresentation(float** a,int row, int col){
     return sparseMatrix;
 }
 
-vector<sparseRepresent> EIC::zeroDiagSparse(float a[], int n){
-    vector<sparseRepresent> sparseMatrix;
-    sparseRepresent temp;
+map<pair<int,int>,float> zeroDiagSparse(float a[], int n){
+    map<pair<int,int>,float> sparseMatrix;
     for (int i=0;i<n;i++){
-        temp.i=i;
-        temp.j=i;
-        temp.data=a[i];
-        sparseMatrix.push_back(temp);
+        sparseMatrix.insert(make_pair(pair<int,int>(i,i),a[i]));
     }
     return sparseMatrix;
 
 }
+
 void EIC::discreteMatrixDifference(float** a,int row, int column, int n){
     if(n==0){
         return;
@@ -164,21 +161,6 @@ void EIC::discreteMatrixDifference(float** a,int row, int column, int n){
         }
     }
     return discreteMatrixDifference(a, row, column-1, n-1);
-}
-// Matrix square D*D.T
-vector<sparseRepresent> EIC::matrixSquare(vector<sparseRepresent> mat){
-    
-}
-vector<sparseRepresent> EIC::matrixTranspose(vector<sparseRepresent> mat1){
-    vector<sparseRepresent> D=mat1;
-    vector<sparseRepresent> Dt;
-    for(int i=0;i<mat1.size();i++){
-        int temp=D[i].i;
-        D[i].i=D[i].j;
-        D[i].j=temp;
-        Dt.push_back(D[i]);
-    }
-    return Dt;
 }
 
 map<pair<int,int>,float> matrixTranspose(map<pair<int,int>,float> D){
@@ -197,6 +179,7 @@ void EIC::printHashSparse(map<pair<int,int>,float> hSparse){
     }
 }
 
+// Matrix square D*D.T
 map<pair<int,int>,float> EIC::matrixSquare(map<pair<int,int>,float> hashMat1, map<pair<int,int>,float> hashMat2){
     cout << "mat1"<< endl;
     printHashSparse(hashMat1);
