@@ -123,7 +123,7 @@ EIC *EIC::eicMerge(const vector<EIC *> &eics)
     meic->sample = eics[0]->sample;
     return meic;
 }
-
+// ///////////////////////////////////////////////
 vector<sparseRepresent> EIC::sparseRepresentation(float** a,int row, int col){
     vector<sparseRepresent> sparseMatrix;
     sparseRepresent temp;
@@ -179,6 +179,15 @@ vector<sparseRepresent> EIC::matrixTranspose(vector<sparseRepresent> mat1){
         Dt.push_back(D[i]);
     }
     return Dt;
+}
+
+map<pair<int,int>,float> scalarMultiplication(float scalar, map<pair<int,int>,float> mat){
+    map<pair<int,int>,float>::iterator itr;
+    map<pair<int,int>,float> matc=mat;
+    for(itr=matc.begin();itr!=matc.end();itr++){
+        itr->second*=scalar;
+    }
+    return matc;
 }
 
 void EIC::linearMulti(float a1[], float a2[], float ans[], int n){
@@ -300,7 +309,7 @@ void EIC::computeBaseLine(int smoothing_window, int dropTopX)
 
     */
 }
-
+// ///////////////////////////////////////////////
 void EIC::subtractBaseLine()
 {
     // Merged to 776
