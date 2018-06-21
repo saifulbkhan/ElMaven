@@ -181,6 +181,24 @@ vector<sparseRepresent> EIC::matrixTranspose(vector<sparseRepresent> mat1){
     return Dt;
 }
 
+map<pair<int,int>,float> EIC::matrixSum(map<pair<int,int>,float> mat1, map<pair<int,int>,float> mat2){
+    map<pair<int,int>,float>::iterator itr1, itr2, itr;
+    map<pair<int,int>,float> finalSum;
+    for(itr1=mat1.begin();itr1!=mat1.end();itr1++){
+        finalSum.insert(make_pair(pair<int,int>(itr1->first.first,itr1->first.second),itr1->second));
+    }
+    for(itr2=mat2.begin();itr2!=mat2.end();itr2++){
+        itr=finalSum.find(make_pair(itr2->first.first, itr2->first.second));
+        if(itr==finalSum.end()){
+            finalSum.insert(make_pair(pair<int,int>(itr2->first.first,itr2->first.second),itr2->second));
+        }
+        else{
+            itr->second+=itr2->second;
+        }
+    }
+    return finalSum;
+}
+
 map<pair<int,int>,float> EIC::scalarMultiplication(float scalar, map<pair<int,int>,float> mat){
     map<pair<int,int>,float>::iterator itr;
     map<pair<int,int>,float> matc=mat;
