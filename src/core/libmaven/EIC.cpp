@@ -291,7 +291,7 @@ void EIC::computeBaseLine(int smoothing_window, int dropTopX)
     */
     // /*
     int n = intensity.size();
-    cerr << n << endl;
+    // cerr << n << endl;
     if (n == 0)
         return;
 
