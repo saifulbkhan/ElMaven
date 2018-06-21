@@ -181,6 +181,32 @@ vector<sparseRepresent> EIC::matrixTranspose(vector<sparseRepresent> mat1){
     return Dt;
 }
 
+map<pair<int,int>,float> EIC::matrixSquare(map<pair<int,int>,float> hashMat1, map<pair<int,int>,float> hashMat2){
+    cout << "mat1"<< endl;
+    printHashSparse(hashMat1);
+    cout << "mat2"<< endl;
+    printHashSparse(hashMat2);
+    cout << "Prod"<< endl;
+    map<pair<int,int>,float> hashRes;
+    pair<int,int> x;
+    map<pair<int,int>,float>::iterator itr1,itr2,itr;
+    for(itr1=hashMat1.begin();itr1!=hashMat1.end();itr1++){
+        for(itr2=hashMat2.begin();itr2!=hashMat2.end();itr2++){
+            if(itr1->first.second==itr2->first.first){
+                x=make_pair(itr1->first.first, itr2->first.second);
+                itr=hashRes.find(x);
+                if(itr==hashRes.end()){
+                    hashRes.insert(make_pair(x,(float)itr1->second*itr2->second));
+                }
+                else{
+                    itr->second+=(float)itr1->second*itr2->second;
+                }
+            }
+        }
+    }
+    return hashRes;
+}
+
 map<pair<int,int>,float> EIC::matrixSum(map<pair<int,int>,float> mat1, map<pair<int,int>,float> mat2){
     map<pair<int,int>,float>::iterator itr1, itr2, itr;
     map<pair<int,int>,float> finalSum;
