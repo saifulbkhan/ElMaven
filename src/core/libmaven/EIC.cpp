@@ -124,21 +124,18 @@ EIC *EIC::eicMerge(const vector<EIC *> &eics)
     return meic;
 }
 // ///////////////////////////////////////////////
-vector<sparseRepresent> EIC::sparseRepresentation(float** a,int row, int col){
-    vector<sparseRepresent> sparseMatrix;
-    sparseRepresent temp;
+map<pair<int,int>,float> sparseRepresentation(float** a,int row, int col){
+    map<pair<int,int>,float> sparseMatrix;
     for(int i=0;i<row;i++){
         for(int j=0;j<col;j++){
             if(a[i][j]!=0){
-                temp.i=i;
-                temp.j=j;
-                temp.data=a[i][j];
-                sparseMatrix.push_back(temp);
+                sparseMatrix.insert(make_pair(pair<int,int>(i,j),a[i][j]));
             }
         }
     }
     return sparseMatrix;
 }
+
 
 map<pair<int,int>,float> zeroDiagSparse(float a[], int n){
     map<pair<int,int>,float> sparseMatrix;
