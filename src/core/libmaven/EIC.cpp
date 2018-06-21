@@ -181,6 +181,13 @@ vector<sparseRepresent> EIC::matrixTranspose(vector<sparseRepresent> mat1){
     return Dt;
 }
 
+void EIC::printHashSparse(map<pair<int,int>,float> hSparse){
+    map<pair<int,int>,float>::iterator itr;
+    for(itr=hSparse.begin();itr!=hSparse.end();itr++){
+        cerr << itr->first.first<<","<<itr->first.second << " " << itr->second<< endl;
+    }
+}
+
 map<pair<int,int>,float> EIC::matrixSquare(map<pair<int,int>,float> hashMat1, map<pair<int,int>,float> hashMat2){
     cout << "mat1"<< endl;
     printHashSparse(hashMat1);
