@@ -181,6 +181,15 @@ vector<sparseRepresent> EIC::matrixTranspose(vector<sparseRepresent> mat1){
     return Dt;
 }
 
+map<pair<int,int>,float> matrixTranspose(map<pair<int,int>,float> D){
+    map<pair<int,int>,float> Dt;
+    map<pair<int,int>,float>::iterator itr;
+    for(itr=D.begin();itr!=D.end();itr++){
+        Dt.insert(make_pair(pair<int,int>(itr->first.second,itr->first.first),itr->second));
+    }
+    return Dt;
+}
+
 void EIC::printHashSparse(map<pair<int,int>,float> hSparse){
     map<pair<int,int>,float>::iterator itr;
     for(itr=hSparse.begin();itr!=hSparse.end();itr++){
