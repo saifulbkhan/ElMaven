@@ -124,7 +124,7 @@ EIC *EIC::eicMerge(const vector<EIC *> &eics)
     return meic;
 }
 // ///////////////////////////////////////////////
-map<pair<int,int>,float> sparseRepresentation(float** a,int row, int col){
+map<pair<int,int>,float> EIC::sparseRepresentation(float** a,int row, int col){
     map<pair<int,int>,float> sparseMatrix;
     for(int i=0;i<row;i++){
         for(int j=0;j<col;j++){
@@ -137,7 +137,7 @@ map<pair<int,int>,float> sparseRepresentation(float** a,int row, int col){
 }
 
 
-map<pair<int,int>,float> zeroDiagSparse(float a[], int n){
+map<pair<int,int>,float> EIC::zeroDiagSparse(float a[], int n){
     map<pair<int,int>,float> sparseMatrix;
     for (int i=0;i<n;i++){
         sparseMatrix.insert(make_pair(pair<int,int>(i,i),a[i]));
@@ -160,7 +160,7 @@ void EIC::discreteMatrixDifference(float** a,int row, int column, int n){
     return discreteMatrixDifference(a, row, column-1, n-1);
 }
 
-map<pair<int,int>,float> matrixTranspose(map<pair<int,int>,float> D){
+map<pair<int,int>,float> EIC::matrixTranspose(map<pair<int,int>,float> D){
     map<pair<int,int>,float> Dt;
     map<pair<int,int>,float>::iterator itr;
     for(itr=D.begin();itr!=D.end();itr++){
@@ -245,7 +245,7 @@ void EIC::computeBaseLine(int smoothing_window, int dropTopX)
         baseline = NULL;
         eic_noNoiseObs = 0;
     }
-
+    /*
     const float lam=1000;
     const float p=0.01;
     int L=intensity.size();
@@ -288,8 +288,8 @@ void EIC::computeBaseLine(int smoothing_window, int dropTopX)
 
 
 
-
-    /*
+    */
+    // /*
     int n = intensity.size();
     cerr << n << endl;
     if (n == 0)
@@ -347,7 +347,7 @@ void EIC::computeBaseLine(int smoothing_window, int dropTopX)
     //cerr << "eic size = " << n << "\n";
     //cerr << "eic no noise obs = " << eic_noNoiseObs << "\n";
 
-    */
+    // */
 }
 // ///////////////////////////////////////////////
 void EIC::subtractBaseLine()

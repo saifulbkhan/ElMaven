@@ -120,6 +120,15 @@ class EIC
     * @param  smoothingWindow number of scans used for smoothing in each iteration 
     * @param  dropTopX percentage of top intensities to be removed before setting baseline
     */
+    map<pair<int,int>,float> sparseRepresentation(float** a,int row, int col);
+    map<pair<int,int>,float> zeroDiagSparse(float a[], int n);
+    void discreteMatrixDifference(float** a,int row, int column, int n);
+    map<pair<int,int>,float> matrixTranspose(map<pair<int,int>,float> D);
+    void printHashSparse(map<pair<int,int>,float> hSparse);
+    map<pair<int,int>,float> matrixSquare(map<pair<int,int>,float> hashMat1, map<pair<int,int>,float> hashMat2);
+    map<pair<int,int>,float> matrixSum(map<pair<int,int>,float> mat1, map<pair<int,int>,float> mat2);
+    map<pair<int,int>,float> scalarMultiplication(float scalar, map<pair<int,int>,float> mat);
+    void linearMulti(float a1[], float a2[], float ans[], int n);
     void computeBaseLine(int smoothingWindow, int dropTopX);
 
     /**
