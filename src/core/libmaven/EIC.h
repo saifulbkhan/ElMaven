@@ -9,6 +9,9 @@
 #include "Peak.h"
 #include "PeakGroup.h"
 #include "mzSample.h"
+#include <../Eigen/Sparse>
+// typedef SparseMatrix<double> SparseMatrixXd;
+using namespace Eigen;
 class Peak;
 class PeakGroup;
 class mzSample;

@@ -236,15 +236,35 @@ void EIC::linearMulti(float a1[], float a2[], float ans[], int n){
     }
 }
 
+void getSparseFromHash(map<pair<int,int>,float> hSparse, int n, int m){
+    SparseMatrix<double> matA(n,m);
+    map<pair<int,int>,float>::iterator itr;
+    for(itr=hSparse.begin();itr!=hSparse.end();itr++){
+        matA.coeffRef(itr->first.first, itr->first.second)=itr->second;
+    }
+    cerr << matA << endl;
+    // return matA;
+}
+
 void EIC::computeBaseLine(int smoothing_window, int dropTopX)
 {
-    cerr << "baseline" << endl;
+    // cerr << "baseline" << endl;
     if (baseline != NULL)
     { //delete previous baseline if exists
         delete[] baseline;
         baseline = NULL;
         eic_noNoiseObs = 0;
     }
+    float** myTempArr;
+    myTempArr=new float* [2];
+    for(int i=0;i<2;i++){
+        myTempArr[i]=new float[2];
+    }
+    myTempArr[0][0]=1;
+    myTempArr[0][1]=2;
+    myTempArr[1][0]=3;
+    myTempArr[1][1]=4;
+    getSparseFromHash(sparseRepresentation(myTempArr, 2,2),2,2);
     /*
     const float lam=1000;
     const float p=0.01;
