@@ -245,6 +245,10 @@ SparseMatrix<double> EIC::getSparseFromHash(map<pair<int,int>,float> hSparse, in
     // cerr << matA << endl;
     return matA;
 }
+vector<float> EIC::solveLinearSystem(SparseMatrix<double> hermitianMat, VectorXd b){
+    ConjugateGradient<SparseMatrix<double>, Eigen::Upper> solver;
+
+}
 
 void EIC::computeBaseLine(int smoothing_window, int dropTopX)
 {
@@ -265,7 +269,6 @@ void EIC::computeBaseLine(int smoothing_window, int dropTopX)
     myTempArr[1][0]=1;
     myTempArr[1][1]=-1;
     SparseMatrix<double> eigenSparse = getSparseFromHash(sparseRepresentation(myTempArr, 2,2),2,2);
-    // non hermitian matrix
     ConjugateGradient<SparseMatrix<double>, Eigen::Upper> solver;
     // HouseholderQR<SparseMatrix<double>> solver(eigenSparse);
     VectorXd b(2);
