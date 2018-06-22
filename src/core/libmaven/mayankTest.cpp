@@ -36,6 +36,7 @@ int main(){
     myTempArr[1][0]=1;
     myTempArr[1][1]=1;
     SparseMatrix<double> eigenSparse = getSparseFromHash(sparseRepresentation(myTempArr, 2,2),2,2);
+    // cannot solve using conjugate solver beacuase matrix in non-hermitian
     ConjugateGradient<SparseMatrix<double>, Eigen::Upper> solver;
     // HouseholderQR<SparseMatrix<double>> solver(eigenSparse);
     VectorXd b(2);
