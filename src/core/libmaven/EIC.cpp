@@ -247,7 +247,9 @@ SparseMatrix<double> EIC::getSparseFromHash(map<pair<int,int>,float> hSparse, in
 }
 vector<float> EIC::solveLinearSystem(SparseMatrix<double> hermitianMat, VectorXd b){
     ConjugateGradient<SparseMatrix<double>, Eigen::Upper> solver;
-
+    solver.compute(eigenSparse);
+    VectorXd x=solver.solve(b);
+    return x;
 }
 
 void EIC::computeBaseLine(int smoothing_window, int dropTopX)
