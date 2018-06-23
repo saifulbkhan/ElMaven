@@ -125,6 +125,7 @@ EIC *EIC::eicMerge(const vector<EIC *> &eics)
 }
 // ///////////////////////////////////////////////
 map<pair<int,int>,float> EIC::sparseRepresentation(float** a,int row, int col){
+    cerr << "sparseRepresentation" << endl;
     map<pair<int,int>,float> sparseMatrix;
     for(int i=0;i<row;i++){
         for(int j=0;j<col;j++){
@@ -138,6 +139,7 @@ map<pair<int,int>,float> EIC::sparseRepresentation(float** a,int row, int col){
 
 
 map<pair<int,int>,float> EIC::zeroDiagSparse(float a[], int n){
+    cerr << "zeroDiagSparse" << endl;
     map<pair<int,int>,float> sparseMatrix;
     for (int i=0;i<n;i++){
         sparseMatrix.insert(make_pair(pair<int,int>(i,i),a[i]));
@@ -147,6 +149,7 @@ map<pair<int,int>,float> EIC::zeroDiagSparse(float a[], int n){
 }
 
 void EIC::discreteMatrixDifference(float** a,int row, int column, int n){
+    cerr << "discreteMatrixDifference" << endl;
     if(n==0){
         return;
     }
@@ -161,6 +164,7 @@ void EIC::discreteMatrixDifference(float** a,int row, int column, int n){
 }
 
 map<pair<int,int>,float> EIC::matrixTranspose(map<pair<int,int>,float> D){
+    cerr << "matrixTranspose" << endl;
     map<pair<int,int>,float> Dt;
     map<pair<int,int>,float>::iterator itr;
     for(itr=D.begin();itr!=D.end();itr++){
@@ -170,6 +174,7 @@ map<pair<int,int>,float> EIC::matrixTranspose(map<pair<int,int>,float> D){
 }
 
 void EIC::printHashSparse(map<pair<int,int>,float> hSparse){
+    cerr << "printHashSparse" << endl;
     map<pair<int,int>,float>::iterator itr;
     for(itr=hSparse.begin();itr!=hSparse.end();itr++){
         cerr << itr->first.first<<","<<itr->first.second << " " << itr->second<< endl;
@@ -177,12 +182,14 @@ void EIC::printHashSparse(map<pair<int,int>,float> hSparse){
 }
 
 // Matrix square D*D.T
+// Complexity O(mn*log(k!))
 map<pair<int,int>,float> EIC::matrixSquare(map<pair<int,int>,float> hashMat1, map<pair<int,int>,float> hashMat2){
-    cout << "mat1"<< endl;
-    printHashSparse(hashMat1);
-    cout << "mat2"<< endl;
-    printHashSparse(hashMat2);
-    cout << "Prod"<< endl;
+    cerr << "matrixSquare" << endl;
+    // cout << "mat1"<< endl;
+    // printHashSparse(hashMat1);
+    // cout << "mat2"<< endl;
+    // printHashSparse(hashMat2);
+    // cout << "Prod"<< endl;
     map<pair<int,int>,float> hashRes;
     pair<int,int> x;
     map<pair<int,int>,float>::iterator itr1,itr2,itr;
@@ -204,6 +211,7 @@ map<pair<int,int>,float> EIC::matrixSquare(map<pair<int,int>,float> hashMat1, ma
 }
 
 map<pair<int,int>,float> EIC::matrixSum(map<pair<int,int>,float> mat1, map<pair<int,int>,float> mat2){
+    cerr << "matrixSum" << endl;
     map<pair<int,int>,float>::iterator itr1, itr2, itr;
     map<pair<int,int>,float> finalSum;
     for(itr1=mat1.begin();itr1!=mat1.end();itr1++){
@@ -222,6 +230,7 @@ map<pair<int,int>,float> EIC::matrixSum(map<pair<int,int>,float> mat1, map<pair<
 }
 
 map<pair<int,int>,float> EIC::scalarMultiplication(float scalar, map<pair<int,int>,float> mat){
+    cerr << "scalarMultiplication" << endl;
     map<pair<int,int>,float>::iterator itr;
     map<pair<int,int>,float> matc=mat;
     for(itr=matc.begin();itr!=matc.end();itr++){
@@ -230,13 +239,15 @@ map<pair<int,int>,float> EIC::scalarMultiplication(float scalar, map<pair<int,in
     return matc;
 }
 
-void EIC::linearMulti(float a1[], float a2[], float ans[], int n){
+void EIC::linearMulti(float a1[], vector<float> a2, float ans[], int n){
+    cerr << "linearMulti" << endl;
     for(int i=0;i<n;i++){
         ans[i]=a1[i]*a2[i];
     }
 }
 
 SparseMatrix<double> EIC::getSparseFromHash(map<pair<int,int>,float> hSparse, int n, int m){
+    cerr << "getSparseFromHash" << endl;
     SparseMatrix<double> matA(n,m);
     map<pair<int,int>,float>::iterator itr;
     for(itr=hSparse.begin();itr!=hSparse.end();itr++){
@@ -246,45 +257,59 @@ SparseMatrix<double> EIC::getSparseFromHash(map<pair<int,int>,float> hSparse, in
     return matA;
 }
 vector<float> EIC::solveLinearSystem(SparseMatrix<double> hermitianMat, VectorXd b){
+    cerr << "solveLinearSystem" << endl;
     ConjugateGradient<SparseMatrix<double>, Eigen::Upper> solver;
-    solver.compute(eigenSparse);
+    solver.compute(hermitianMat);
     VectorXd x=solver.solve(b);
-    return x;
+    vector<float> retVec;
+    for(int i=0;i<x.size();i++){
+        retVec.push_back((float)x[i]);
+    }
+    return retVec;
+}
+void EIC::updateBaselineViaVector(vector<float> x){
+    cerr << "updateBaselineViaVector" << endl;
+    for(int i=0;i<x.size();i++){
+        baseline[i]=x[i];
+    }
+}
+void EIC::booleanUpdate(float w[],int L, float p){
+    cerr << "booleanUpdate" << endl;
+    for(int i=0;i<L;i++){
+        if(intensity[i]>baseline[i]){
+            w[i]=p;
+        }
+        else if(intensity[i]<baseline[i]){
+            w[i]=1-p;
+        }
+    }
 }
 
 void EIC::computeBaseLine(int smoothing_window, int dropTopX)
 {
-    // cerr << "baseline" << endl;
+    cerr << "New Baseline Testing" << endl;
     if (baseline != NULL)
     { //delete previous baseline if exists
         delete[] baseline;
         baseline = NULL;
         eic_noNoiseObs = 0;
     }
-    float** myTempArr;
-    myTempArr=new float* [2];
-    for(int i=0;i<2;i++){
-        myTempArr[i]=new float[2];
-    }
-    myTempArr[0][0]=1;
-    myTempArr[0][1]=1;
-    myTempArr[1][0]=1;
-    myTempArr[1][1]=-1;
-    SparseMatrix<double> eigenSparse = getSparseFromHash(sparseRepresentation(myTempArr, 2,2),2,2);
-    ConjugateGradient<SparseMatrix<double>, Eigen::Upper> solver;
-    // HouseholderQR<SparseMatrix<double>> solver(eigenSparse);
-    VectorXd b(2);
-    b<< 1,2;
-    cerr << b<< endl;
-    solver.compute(eigenSparse);
-    VectorXd x=solver.solve(b);
-    cerr<<"change"<< endl;
-    cerr << x<< endl; 
-    cerr << endl;
-    /*
+    // /*
     const float lam=1000;
     const float p=0.01;
     int L=intensity.size();
+    if (L == 0)
+        return;
+
+    try
+    {
+        baseline = new float[L];
+        std::fill_n(baseline, L, 0);
+    }
+    catch (...)
+    {
+        cerr << "Exception caught while allocating memory " << L << "floats " << endl;
+    }
     float** computationMatrix;
     computationMatrix=new float* [L];
     for(int i=0;i<L;i++){
@@ -300,32 +325,33 @@ void EIC::computeBaseLine(int smoothing_window, int dropTopX)
             }
         }
     }
-    int numRows=L;
-    int numColumns=L;
-    discreteMatrixDifference(computationMatrix,numRows, numColumns, 2);
+    discreteMatrixDifference(computationMatrix,L,L,2);
     // TODO: check for negative value of column if L<=2
-    numColumns-=2;
-    vector<sparseRepresent> sparse_matrix=sparseRepresentation(computationMatrix, numRows, numColumns);
+    map<pair<int,int>,float> D=sparseRepresentation(computationMatrix,L,L);
     float w[L];
     for(int i=0;i<L;i++){
-        w[i]=1;
+        w[i]=1.0;
     }
-    vector<sparseRepresent> zeroDiagMatrix;
-    vector<sparseRepresent> sparse_matrix_transpose;
-
+    map<pair<int,int>,float> W;
+    map<pair<int,int>,float> Z;
+    vector<float> z;
     for(int i=0;i<smoothing_window;i++){
-        zeroDiagMatrix=zeroDiagSparse(w,L);
-        sparse_matrix_transpose=matrixTranspose(sparse_matrix);
-
+        W=zeroDiagSparse(w,L);
+        map<pair<int,int>,float> prod=matrixSquare(D,matrixTranspose(D));
+        Z=matrixSum(W,scalarMultiplication(lam,prod));
+        float wy[L];
+        linearMulti(w,intensity,wy,L);
+        VectorXd b(L);
+        for(int i=0;i<L;i++){
+            b[i]=wy[i];
+        }
+        z=solveLinearSystem(getSparseFromHash(Z,L,L),b);
+        updateBaselineViaVector(z);
+        booleanUpdate(w,L,p);
     }
     
-
-
-
-
-
-    */
-    // /*
+    // */
+    /*
     int n = intensity.size();
     // cerr << n << endl;
     if (n == 0)
@@ -383,7 +409,7 @@ void EIC::computeBaseLine(int smoothing_window, int dropTopX)
     //cerr << "eic size = " << n << "\n";
     //cerr << "eic no noise obs = " << eic_noNoiseObs << "\n";
 
-    // */
+    */
 }
 // ///////////////////////////////////////////////
 void EIC::subtractBaseLine()

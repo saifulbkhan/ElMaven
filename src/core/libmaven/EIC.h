@@ -131,10 +131,11 @@ class EIC
     map<pair<int,int>,float> matrixSquare(map<pair<int,int>,float> hashMat1, map<pair<int,int>,float> hashMat2);
     map<pair<int,int>,float> matrixSum(map<pair<int,int>,float> mat1, map<pair<int,int>,float> mat2);
     map<pair<int,int>,float> scalarMultiplication(float scalar, map<pair<int,int>,float> mat);
-    void linearMulti(float a1[], float a2[], float ans[], int n);
+    void linearMulti(float a1[], vector<float> a2, float ans[], int n);
     SparseMatrix<double> getSparseFromHash(map<pair<int,int>,float> hSparse, int n, int m);
     vector<float> solveLinearSystem(SparseMatrix<double> hermitianMat, VectorXd b);
-
+    void updateBaselineViaVector(vector<float> x);
+    void booleanUpdate(float w[],int L, float p);
     void computeBaseLine(int smoothingWindow, int dropTopX);
 
     /**

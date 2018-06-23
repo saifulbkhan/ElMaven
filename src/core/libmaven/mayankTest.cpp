@@ -25,6 +25,16 @@ SparseMatrix<double> getSparseFromHash(map<pair<int,int>,float> hSparse, int n, 
     // cerr << matA << endl;
     return matA;
 }
+void booleanUpdate(float w[],float intensity[], float baseline[],int L, float p){
+    for(int i=0;i<L;i++){
+        if(intensity[i]>baseline[i]){
+            w[i]=p;
+        }
+        else if(intensity[i]<baseline[i]){
+            w[i]=1-p;
+        }
+    }
+}
 int main(){
     float** myTempArr;
     myTempArr=new float* [3];
@@ -44,7 +54,10 @@ int main(){
     ConjugateGradient<SparseMatrix<double>, Eigen::Upper> solver;
     // HouseholderQR<SparseMatrix<double>> solver(eigenSparse);
     VectorXd b(3);
-    b<< 5,10,15;
+    for(int i=0;i<3;i++){
+        b[i]=(i+1)*5;
+    }
+    // b<< 5,10,15;
     cout << b<< endl;
     solver.compute(eigenSparse);
     VectorXd x=solver.solve(b);
@@ -54,5 +67,14 @@ int main(){
     }
     // cout << x<< endl;
     cout << endl;
+    float w[5]={0};
+    float y[5]={7,5,12,69,40};
+    float z[5]={50,70,99,1,45};
+    booleanUpdate(w,y,z,5,0.01);
+    for(int i=0;i<5;i++){
+        cout << w[i]<< " ";
+    }
+    cout << endl;
+
     return 0;
 }
