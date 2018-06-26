@@ -48,8 +48,14 @@ public Q_SLOTS:
 	void setClipboard(QList<PeakGroup*>& groups);
 	void pullIsotopes(PeakGroup* group);
 	void pullIsotopesForBarplot(PeakGroup* group);
-	void updateIsotopicBarplot(PeakGroup* grp);
+	void updateIsotopicBarplot(PeakGroup* group);
 	void updateIsotopicBarplot();
+	/**
+	 * @brief replot the isotope plot
+	 * @details function is called once workerthreadbarplot stops executing marking
+	 * the end of pullIsotopes for the selected group
+	 **/
+	void replotIsoPlot();
 	/**
 	 * @brief set peak and group if a specific peak is selected
 	**/

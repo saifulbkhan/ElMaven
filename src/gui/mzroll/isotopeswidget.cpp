@@ -51,7 +51,7 @@ IsotopeWidget::IsotopeWidget(MainWindow *mw)
 	workerThreadBarplot->setMavenParameters(mavenParameters);
 	workerThreadBarplot->setPeakDetector(new PeakDetector(mavenParameters));
 
-	connect(workerThreadBarplot, SIGNAL(finished()), this, SLOT(updateIsotopicBarplot()));
+	connect(workerThreadBarplot, SIGNAL(finished()), this, SLOT(replotIsoPlot()));
 	connect(workerThreadBarplot, SIGNAL(finished()), _mw->getEicWidget()->scene(), SLOT(update()));
 }
 
@@ -110,15 +110,6 @@ void IsotopeWidget::setPeakGroupAndMore(PeakGroup *grp, bool bookmarkflg)
 		pullIsotopes(isotopeParameters->_group);
 	
 	computeIsotopes(isotopeParameters->_formula);
-}
-
-void IsotopeWidget::updateIsotopicBarplot(PeakGroup *grp)
-{
-	if (!grp)
-		return;
-	isotopeParametersBarPlot->_group = grp;
-	if (grp && grp->type() != PeakGroup::Isotope)
-		pullIsotopesForBarplot(grp);
 }
 
 void IsotopeWidget::setCompound(Compound *cpd)
@@ -404,11 +395,37 @@ void IsotopeWidget::setClipboard()
 
 void IsotopeWidget::updateIsotopicBarplot()
 {
-	isotopeParametersBarPlot->_group = _mw->getEicWidget()->getParameters()->getSelectedGroup();
-	if (isotopeParametersBarPlot->_group)
+	PeakGroup* group = _mw->getEicWidget()->getParameters()->getSelectedGroup();
+	if (group) 
 	{
-		_mw->isotopePlot->setPeakGroup(isotopeParametersBarPlot->_group);
+		isotopeParametersBarPlot->_group = group;
+		updateIsotopicBarplot(group);
 	}
+}
+
+void IsotopeWidget::updateIsotopicBarplot(PeakGroup* group)
+{
+	if (group == NULL) return;
+	
+	if (group->type() != PeakGroup::Isotope)
+	{
+		group->childrenBarPlot.clear();
+		pullIsotopesForBarplot(group);
+	}
+	else
+	{
+		isotopeParametersBarPlot->_group = group->getParent();
+		updateIsotopicBarplot(group->getParent());
+	}
+}
+
+void IsotopeWidget::replotIsoPlot()
+{	
+	_mw->isotopePlot->clear();
+
+	if (!isotopeParametersBarPlot->_group) return;
+	_mw->isotopePlot->setPeakGroup(isotopeParametersBarPlot->_group);
+
 	workerThreadBarplot->stop();
 
 	if (_mw->threadCompound != NULL)
