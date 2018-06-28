@@ -11,6 +11,7 @@ class PeakClassification {
 
     public:
         PeakClassification();
+        void trainPeaks(vector<PeakGroup*> groups);
 
     private:
         vector<PeakGroup*> filterMarkedGroups(vector<PeakGroup*> groups);
