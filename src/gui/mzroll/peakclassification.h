@@ -10,12 +10,26 @@ class PeakClassification {
 
     public:
         void trainPeaks(vector<PeakGroup*> groups);
-        void trainPeaks(vector<Peak> peaks);
+        void trainPeaks(map<Peak, char> peaks);
 
     private:
-        int num_outputs;
-        vector< vector<float> > getPeakFeatures(vector<Peak> peaks);
         vector<float> getPeakFeatures(Peak peak);
+        void featuresToCsv(vector<PeakFeatures*> features);
+
+};
+
+struct PeakFeatures {
+
+    char label = '';
+    float peakAreaFractional = 0;
+	float noNoiseFraction = 0;
+	float symmetry = 0;
+	float groupOverlap = 0;
+	float gaussFitR2 = 0;
+	float signalToNoise = 0;
+	float peakRank = 0;
+	float peakIntensity = 0;
+	float skinnyPeak = 0;
 
 };
 
