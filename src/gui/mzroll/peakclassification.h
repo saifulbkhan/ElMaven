@@ -6,15 +6,16 @@
 #include "csvparser.h"
 #include "PeakGroup.h"
 
-
 class PeakClassification {
 
     public:
-        PeakClassification();
         void trainPeaks(vector<PeakGroup*> groups);
+        void trainPeaks(vector<Peak> peaks);
 
     private:
-        vector<PeakGroup*> filterMarkedGroups(vector<PeakGroup*> groups);
+        int num_outputs;
+        vector< vector<float> > getPeakFeatures(vector<Peak> peaks);
+        vector<float> getPeakFeatures(Peak peak);
 
 };
 

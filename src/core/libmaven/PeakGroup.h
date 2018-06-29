@@ -538,5 +538,10 @@ class PeakGroup{
          * are marked as selected.
         */
         void setSelectedSamples(vector<mzSample*> vsamples);
+
+        bool isMarked() {
+            if(label == 'g' || label == 'b') return true;
+            else return false;
+        }
 };
 #endif
