@@ -56,7 +56,6 @@ PeakFeatures PeakClassification::getPeakFeatures(Peak peak) {
 void PeakClassification::exportFeatures(vector<PeakFeatures> features) {
 
     QString fileName = "test.csv";
-
     if (fileName.isEmpty()) return;
 
     QString SEP="\t";
@@ -67,7 +66,18 @@ void PeakClassification::exportFeatures(vector<PeakFeatures> features) {
         SEP="\t";
     }
 
-    QFile data(fileName);
+    QString filePath;
+
+    QTemporaryDir dir;
+    if (dir.isValid()) {
+        filePath = QDir::cleanPath(dir.path() + QDir::separator() + fileName);
+    } else {
+        return;
+    }
+
+    qDebug() << "filePath " << filePath << endl;
+
+    QFile data(filePath);
     if (data.open(QFile::WriteOnly | QFile::Truncate)) {
         QTextStream out(&data);
 
