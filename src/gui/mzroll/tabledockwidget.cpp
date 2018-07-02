@@ -71,6 +71,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, in
     QWidgetAction *btnScatter = new TableToolBarWidgetAction(toolBar, this,  "btnScatter");
     QWidgetAction *btnCluster = new TableToolBarWidgetAction(toolBar, this,  "btnCluster");
     QWidgetAction *btnTrain = new TableToolBarWidgetAction(toolBar, this,  "btnTrain");
+    QWidgetAction *btnTrainOnCloud = new TableToolBarWidgetAction(toolBar, this, "btnTrainOnCloud");
     QWidgetAction *btnXML = new TableToolBarWidgetAction(toolBar, this,  "btnXML");
     QWidgetAction *btnLoad = new TableToolBarWidgetAction(toolBar, this,  "btnLoad");
     QWidgetAction *btnGood = new TableToolBarWidgetAction(toolBar, this,  "btnGood");
@@ -87,6 +88,7 @@ TableDockWidget::TableDockWidget(MainWindow* mw, QString title, int numColms, in
     toolBar->addAction(btnGood);
     toolBar->addAction(btnBad);
     toolBar->addAction(btnTrain);
+    toolBar->addAction(btnTrainOnCloud);
     toolBar->addAction(btnHeatmapelete);
     toolBar->addWidget(btnMerge);
 
@@ -153,6 +155,20 @@ void TableDockWidget::showLog() {
 void TableDockWidget::showTrainDialog() {
 
     traindialog->show();
+}
+
+void TableDockWidget::trainOnCloud() {
+
+    PeakClassification* peakClassification = new PeakClassification();
+
+    vector<PeakGroup*> groups;
+    for(int i=0; i <allgroups.size(); i++ ) {
+        PeakGroup* grp = &allgroups[i];
+        if (grp->isMarked()) groups.push_back(grp);
+    }
+
+    peakClassification->trainPeaks(groups);
+
 }
 
 void TableDockWidget::showClusterDialog() {
@@ -2489,7 +2505,16 @@ QWidget* TableToolBarWidgetAction::createWidget(QWidget *parent) {
         connect(btnTrain,SIGNAL(clicked()), td, SLOT(showTrainDialog()));
         return btnTrain;
 
-    } else if (btnName == "btnXML") {
+    } else if (btnName == "btnTrainOnCloud") {
+
+        QToolButton* btnTrainOnCloud = new QToolButton(parent);
+        btnTrainOnCloud->setIcon(QIcon(rsrcPath + "/cloud-computing.png"));
+        btnTrainOnCloud->setToolTip("Train Neural Net on Cloud");
+        connect(btnTrainOnCloud, SIGNAL(clicked()), td, SLOT(trainOnCloud()));
+        return btnTrainOnCloud;
+    }
+    
+    else if (btnName == "btnXML") {
 
         QToolButton* btnXML = new QToolButton(parent);
         btnXML->setIcon(QIcon(rsrcPath + "/exportxml.png"));

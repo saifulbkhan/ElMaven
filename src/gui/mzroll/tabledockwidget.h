@@ -11,6 +11,7 @@
 #include "QHistogramSlider.h"
 #include "saveJson.h"
 #include "jsonReports.h";
+#include "peakclassification.h"
 
 class MainWindow;
 class AlignmentVizWidget;
@@ -125,22 +126,24 @@ public Q_SLOTS:
     void clearFocusedGroups();
     void unhideFocusedGroups();
 
-      //input from xml
+    //input from xml
     void loadPeakTable();
     void loadPeakTable(QString infile);
 
-      //output to xml
+    //output to xml
 	void savePeakTable();
     void savePeakTable(QString fileName);
 	void writePeakTableXML(QXmlStreamWriter &stream);
 
-      //output to csv file
-      //Added when Merging to Maven776 - Kiran
-      void exportGroupsToSpreadsheet();
-      void prepareDataForPolly(QString writable_temp_dir,QString export_format,QString user_filename);
+
+    void exportGroupsToSpreadsheet();
+    void prepareDataForPolly(QString writable_temp_dir,QString export_format,QString user_filename);
     void exportJsonToPolly(QString writable_temp_dir,QString jsonfileName);
     void showTrainDialog();
     void showClusterDialog();
+
+    void trainOnCloud();
+
     inline void selectedPeakSet()
     {
         peakTableSelection = peakTableSelectionType::selected;
