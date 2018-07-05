@@ -52,6 +52,7 @@
 //Added when merged with Maven776 - Kiran
 #include "remotespectrahandler.h"
 #include "messageBoxResize.h"
+#include "uploadData.h"
 #include <csignal>
 #include <QList>
 #include <QRegExp>
@@ -249,6 +250,8 @@ public:
 	void isotopeC13Correct(MatrixXf& MM, int numberofCarbons, map<unsigned int, string> carbonIsotopeSpecies);
 	void autoSaveSignal();
 	void normalizeIsotopicMatrix(MatrixXf &MM);
+
+	void uploadDataHelper();
 
 	void savePeaksTable(TableDockWidget* peaksTable, QString fileName, QString tableName);
 

@@ -79,7 +79,7 @@ win32 {
 }
 
 
-LIBS +=  -lmaven -lobiwarp -lpugixml -lneural -lcsvparser -lpls -lErrorHandling -lLogger -lcdfread -lnetcdf -lz -lpollyCLI               #64bit
+LIBS +=  -lmaven -lobiwarp -lpugixml -lneural -lcsvparser -lpls -lErrorHandling -lLogger -lcdfread -lnetcdf -lz -lpollyCLI -lcurl              #64bit
 
 macx {
 
@@ -187,7 +187,8 @@ HEADERS +=  stable.h \
                     ElmavCrashHandler.h \
                     isotopeplotdockwidget.h \
                     gettingstarted.h \
-                    pollywaitdialog.h
+                    pollywaitdialog.h \
+                    uploadData.h
 
 
 
@@ -259,7 +260,8 @@ database.cpp \
     ElmavCrashHandler.cpp \
     isotopeplotdockwidget.cpp \
     gettingstarted.cpp \
-    pollywaitdialog.cpp
+    pollywaitdialog.cpp \
+    uploadData.cpp
 
 
 contains (DEFINES,EMBEDHTTPSERVER) {

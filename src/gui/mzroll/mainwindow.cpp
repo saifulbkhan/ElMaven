@@ -2151,12 +2151,48 @@ void MainWindow::writeSettings() {
 	qDebug() << "Settings saved to " << settings->fileName();
 }
 
-void MainWindow::closeEvent(QCloseEvent *event) {
-	settings->setValue("closeEvent", 1);
-	this->saveMzRoll();
-	writeSettings();
-	event->accept();
+void MainWindow::uploadDataHelper() {
+	/*
+	if (enableDataShare) {}
+	 */
+	for (size_t i = 0; i < groupTables.size(); i++) {
+		QList<PeakGroup* > allgroups = groupTables[i]->getGroups();
 
+		if (allgroups.size() != 0) {
+			/**
+		     * copy all groups from <allgroups> to <vallgroups> which is used by
+		     * < libmaven/jsonReports.cpp>
+		    */
+		    groupTables[i]->vallgroups.clear();
+		    for(int j = 0 ; j < allgroups.size(); j++){
+		        groupTables[i]->vallgroups.push_back(*allgroups[j]);
+		    }
+
+			QString fileName = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+			fileName.append("/elmaven-user-data.json");
+
+			qDebug() << fileName;
+
+			saveJson * jsonSaveThread = new saveJson();
+		    jsonSaveThread->setMainwindow(this);
+		    jsonSaveThread->setPeakTable(groupTables[i]);
+		    jsonSaveThread->setfileName(fileName.toStdString());
+		    jsonSaveThread->start();
+
+			uploadData jsonUploader(fileName.toStdString());
+		}
+	}
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+	event->ignore();
+    if (QMessageBox::Yes == QMessageBox::question(this, "Quit Program", "Do you really want to quit?", QMessageBox::Yes | QMessageBox::No)) {
+		MainWindow::uploadDataHelper();
+        settings->setValue("closeEvent", 1);
+        this->saveMzRoll();
+        writeSettings();
+        event->accept();
+    }
 }
 
 /**
