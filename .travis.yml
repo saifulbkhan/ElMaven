@@ -9,8 +9,8 @@ matrix:
             - ubuntu-toolchain-r-test
             # - sourceline: 'deb http://ppa.launchpad.net/kubuntu-ppa/backports/ubuntu xenial main'
             - sourceline: 'deb http://ppa.launchpad.net/beineri/opt-qt591-trusty/ubuntu trusty main'
-          packages:
-            - g++-5
+          #packages:
+            #- g++-5
 
 
       dist: trusty
@@ -24,6 +24,7 @@ env:
 
 
 before_install:
+    - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0C49F3730359A14518585931BC711F9BA15703C6
     #- sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 10C56D0DE9977759
 
 install:
@@ -37,16 +38,18 @@ install:
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo apt-get update -qq;
-      sudo apt-get install -y -qq  --allow-unauthenticated qt59base qt59script qt59declarative libboost-all-dev libnetcdf-dev;
+      sudo apt-get install -y -qq  --allow-unauthenticated g++-5 qt59base qt59script qt59declarative libboost-all-dev libnetcdf-dev;
       eval "${MATRIX_EVAL}";
     fi
 
 
 
 before_script:
-  - source /opt/qt59/bin/qt59-env.sh
+  - if [ "$TRAVIS_OS_NAME" == "linux"]; then
+        source /opt/qt59/bin/qt59-env.sh;
+        g++ -v;
+    fi
   - qmake -v
-  - g++ -v
 
 script:
   - |
