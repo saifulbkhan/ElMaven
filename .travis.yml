@@ -25,7 +25,7 @@ env:
 
 before_install:
     -  if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-            sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0C49F3730359A14518585931BC711F9BA15703C6
+            sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0C49F3730359A14518585931BC711F9BA15703C6;
         fi
     #- sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 10C56D0DE9977759
 
