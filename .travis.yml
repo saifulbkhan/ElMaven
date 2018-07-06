@@ -61,7 +61,7 @@ script:
     fi
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      export QT_SELECT=qt5;
+      #export QT_SELECT=qt5;
       export CXX="g++-5";
       export CC="gcc-5";
       sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc;
@@ -69,7 +69,7 @@ script:
       g++ -v;
       gcc -v;
       #qmake -qt=qt5 -v;
-      qmake -qt=qt5 CONFIG+=release -o Makefile build.pro;
+      qmake CONFIG+=release -o Makefile build.pro;
       make -j4;
       ./bin/MavenTests -xml;
     fi
