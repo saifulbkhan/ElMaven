@@ -45,7 +45,7 @@ install:
 
 
 before_script:
-  - if [ "$TRAVIS_OS_NAME" == "linux"]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
         source /opt/qt59/bin/qt59-env.sh;
         g++ -v;
     fi
