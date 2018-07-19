@@ -54,6 +54,7 @@ class Compound{
 
         string name;        /**@param -  name of compound */
         string formula;         /**@param -  formula of compound */
+        string productFormula;  /**@param -  formula of product comppound */
         string kegg_id;         /**@param -  kegg_id-    Kyoto Encyclopedia of Genes and Genomes id*/
         string pubchem_id;      /**@param  -  pubchem_id -    PubChem id*/
         string hmdb_id;         /**@param  -  hmdb_id-    Human Metabolome Database id */
