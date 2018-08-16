@@ -875,55 +875,36 @@ Series:  Prentice-Hall Series in Automatic Computation
         return ( t );
     }
 
-
-    /** Decompress an STL string using zlib and return the original data. */
-    std::string decompress_string(const std::string& str)
+    string uncompressString(const string& compressed)
     {
-        std::string outstring;
+        // take a leap of faith and assume the input is valid
+        QByteArray compressed_data = QByteArray::fromRawData(compressed.c_str(), compressed.size());
+        QByteArray raw_data;
 
-#ifdef ZLIB
-        z_stream zs;                        // z_stream is zlib's control structure
-        memset(&zs, 0, sizeof(zs));
+        uncompressData(compressed_data, raw_data);
 
+        // Note that we may have zero bytes in the string, so we cannot use QString
+        string uncompressed;
+        uncompressed.resize(raw_data.size());
+        std::copy(raw_data.begin(), raw_data.end(), uncompressed.begin());
+        return uncompressed;
+    }
 
+    void uncompressData(const QByteArray& compressed_data, QByteArray& raw_data)
+    {
+        QByteArray czip;
+        czip.resize(4);
+        czip[0] = (compressed_data.size() & 0xff000000) >> 24;
+        czip[1] = (compressed_data.size() & 0x00ff0000) >> 16;
+        czip[2] = (compressed_data.size() & 0x0000ff00) >> 8;
+        czip[3] = (compressed_data.size() & 0x000000ff);
+        czip += compressed_data;
+        raw_data = qUncompress(czip);
 
-        if (inflateInit(&zs) != Z_OK)
-            throw(std::runtime_error("inflateInit failed while decompressing."));
-
-        zs.next_in = (Bytef*)str.data();
-        zs.avail_in = str.size();
-
-        int ret;
-        char outbuffer[32768];
-
-        // get the decompressed bytes blockwise using repeated calls to inflate
-        do {
-            zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
-            zs.avail_out = sizeof(outbuffer);
-
-            ret = inflate(&zs, Z_NO_FLUSH);
-
-            if (outstring.size() < zs.total_out) {
-                outstring.append(outbuffer,
-                        zs.total_out - outstring.size());
-            }
-
-        } while (ret == Z_OK);
-
-        cerr << "B..." << "ret=" << ret;
-
-        inflateEnd(&zs);
-
-        if (ret != Z_STREAM_END) {          // an error occurred that was not EOF
-            std::ostringstream oss;
-            oss << "Exception during zlib decompression: (" << ret << ") "
-                << zs.msg;
-            // throw(std::runtime_error(oss.str()));
+        if (raw_data.isEmpty())
+        {
+            throw(std::runtime_error("Zlib decompression error"));
         }
-
-        cerr << "C...";
-#endif
-        return outstring;
     }
 
     bool gzipInflate( const std::string& compressedBytes, std::string& uncompressedBytes ) {

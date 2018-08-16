@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <QtCore/QByteArray>
 #include "SavGolSmoother.h"
 #include "csvparser.h"
 #include "statistics.h"
@@ -387,12 +388,21 @@ namespace mzUtils {
             std::string& uncompressedBytes);
 
     /**
-     * [decompress_string ]
-     * @method decompress_string
+     * [uncompressString ]
+     * @method uncompressString
      * @param  str               []
      * @return []
      */
-    std::string decompress_string(const std::string& str);
+    string uncompressString(const string& str);
+
+    /**
+     * [uncompressData]
+     * @method uncompressData
+     * @param copmpressed_data
+     * @param raw_data
+     * return []
+     */
+    void uncompressData(const QByteArray& compressed_data, QByteArray& raw_data);
 
     /* rounding and ppm functions */
     /**

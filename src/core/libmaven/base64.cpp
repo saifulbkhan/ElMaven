@@ -23,51 +23,49 @@ namespace base64 {
         return 63;
     }
 
-    int is_base64(char c) {
-        //Merged to 776
-        if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
-                (c >= '0' && c <= '9') || (c == '+')             ||
-                (c == '/')             || (c == '=')) {
-            return true;
-        }
-        return false;
+    static const std::string base64_chars = 
+                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                 "abcdefghijklmnopqrstuvwxyz"
+                 "0123456789+/=";
+
+    bool is_base64(unsigned char c) {
+        return (isalnum(c) || (c == '+') || (c == '/') || (c == '='));
     }
 
-    char *decodeString(const string &src) {
-        // Merged to 776
-        int k, l = src.length();
-        char *buf = (char *)calloc(sizeof(char), l);
-        char *dest = (char *)calloc(sizeof(char), l);
-        char *p = dest;
+    string decodeString(string const& encoded_string) {
+        int in_len = encoded_string.size();
+        int i = 0;
+        int j = 0;
+        int in_ = 0;
+        unsigned char char_array_4[4], char_array_3[3];
+        string ret;
 
-        /* Ignore non base64 chars as per the POSIX standard */
-        for (k = 0, l = 0; src[k]; k++) {
-            if (is_base64(src[k])) {
-                buf[l++] = src[k];
+        while (in_len-- && ( encoded_string[in_] != '=') && is_base64(encoded_string[in_])) {
+            char_array_4[i++] = encoded_string[in_]; in_++;
+            if (i ==4) {
+            for (i = 0; i <4; i++)
+                char_array_4[i] = base64_chars.find(char_array_4[i]);
+
+            char_array_3[0] = ( char_array_4[0] << 2       ) + ((char_array_4[1] & 0x30) >> 4);
+            char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+            char_array_3[2] = ((char_array_4[2] & 0x3) << 6) +   char_array_4[3];
+
+            for (i = 0; (i < 3); i++)
+                ret += char_array_3[i];
+            i = 0;
             }
         }
 
-        for (k = 0; k < l; k += 4) {
-            char c1 = 'A', c2 = 'A', c3 = 'A', c4 = 'A';
-            unsigned char b1 = 0, b2 = 0, b3 = 0, b4 = 0;
+        if (i) {
+            for (j = 0; j < i; j++)
+            char_array_4[j] = base64_chars.find(char_array_4[j]);
 
-            c1 = buf[k];
-            if (k + 1 < l) c2 = buf[k + 1];
-            if (k + 2 < l) c3 = buf[k + 2];
-            if (k + 3 < l) c4 = buf[k + 3];
+            char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+            char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
 
-            b1 = decode(c1);
-            b2 = decode(c2);
-            b3 = decode(c3);
-            b4 = decode(c4);
-
-            *p++ = ((b1 << 2) | (b2 >> 4));
-
-            if (c3 != '=') *p++ = (((b2 & 0xf) << 4) | (b3 >> 2));
-            if (c4 != '=') *p++ = (((b3 & 0x3) << 6) | b4);
+            for (j = 0; (j < i - 1); j++) ret += char_array_3[j];
         }
-        free(buf);
-        return dest;
+        return ret;
     }
 
     vector<float> convertDecodedDataBackToFloat(char *dest, int float_size,
@@ -116,12 +114,72 @@ namespace base64 {
 
     vector<float> decode_base64(const string& src, int float_size, bool neworkorder, bool decompress) {
         //Merged to 776
+        if (decompress)
+        {
+            vector<float> out;
+            out.clear();
+            if (src == "") return out;
+
+            string decompressed;
+
+            QByteArray qt_byte_array = QByteArray::fromRawData(src.c_str(), (int) src.size());
+            QByteArray bazip = QByteArray::fromBase64(qt_byte_array);
+            QByteArray czip;
+            czip.resize(4);
+            czip[0] = (bazip.size() & 0xff000000) >> 24;
+            czip[1] = (bazip.size() & 0x00ff0000) >> 16;
+            czip[2] = (bazip.size() & 0x0000ff00) >> 8;
+            czip[3] = (bazip.size() & 0x000000ff);
+            czip += bazip;
+            QByteArray base64_uncompressed = qUncompress(czip);
+
+            if (base64_uncompressed.isEmpty())
+            {
+                throw(std::runtime_error("Decompression error"));
+            }
+            decompressed.resize(base64_uncompressed.size());
+
+            std::copy(base64_uncompressed.begin(), base64_uncompressed.end(), decompressed.begin());
+
+            char *byte_buffer = reinterpret_cast<char *>(&decompressed[0]);
+            size_t buffer_size = decompressed.size();
+
+            const float * float_buffer = reinterpret_cast<const float *>(byte_buffer);
+            if (buffer_size % float_size != 0)
+            {
+                throw(std::runtime_error("Bad buffer count"));
+            }
+            
+            size_t float_count = buffer_size / float_size;
+
+            // change endianness if necessary
+#if (LITTLE_ENDIAN == 1)
+            neworkorder = !neworkorder;
+#endif
+            if (neworkorder)
+            {
+                if (float_size == 4) // 32 bit
+                {
+                    uint32_t * p = reinterpret_cast<uint32_t *>(byte_buffer);
+                    std::transform(p, p + float_count, p, swapbytes);
+                }
+                else // 64 bit
+                {
+                    uint64_t * p = reinterpret_cast<uint64_t *>(byte_buffer);
+                    std::transform(p, p + float_count, p, swapbytes64);
+                }
+            }
+
+            // copy values
+            out.assign(float_buffer, float_buffer + float_count);
+            return out;
+        }
+
         int size = 1 + (src.length() * 3 / 4 - 4) / float_size;
 
-        char *dest = decodeString(src);
-        if (decompress) {
-            decompressString(&dest, size, float_size);
-        }
+        string decoded = decodeString(src);
+        char *dest = (char *) malloc(sizeof(char) * decoded.size());
+        decoded.copy(dest, decoded.size());
 
         vector<float> decodedArray =
             convertDecodedDataBackToFloat(dest, float_size, neworkorder, size);
@@ -130,17 +188,13 @@ namespace base64 {
 
     }
 
-    void decompressString(char **dest, int &size, int float_size) {
+    void decompressString(const string &str, char **dest, int &size, int float_size) {
         //Merged to 776
-        string decodedStr(*dest);
-        string uncompStr(mzUtils::decompress_string(decodedStr));
+        string uncompressed = mzUtils::uncompressString(str);
 
         free(*dest);
-        *dest = (char *)calloc(sizeof(char), uncompStr.size());
-        for (unsigned int i = 0; i < uncompStr.size(); i++)
-            *dest[i] = uncompStr[i];
-
-        size = 1 + (uncompStr.size() * 3 / 4 - 4) / float_size;
+        *dest = (char *) uncompressed.c_str();
+        size = 1 + (uncompressed.size() * 3 / 4 - 4) / float_size;
     }
 
     unsigned char *convertFromFloatToCharacter(float *srcF,

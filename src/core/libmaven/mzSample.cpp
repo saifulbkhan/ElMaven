@@ -370,9 +370,19 @@ void mzSample::parseMzMLChromatogramList(const xml_node &chromatogramList)
 			if (attr.count("32-bit float"))
 				precision = 32;
 
+			bool decompress = false;
+#ifdef ZLIB
+			// if the data is been compressed in zlib format this part will
+			// take care.
+			if (attr.count("zlib compression"))
+			{
+				decompress = true;
+			}
+#endif
+
 			string binaryDataStr = binaryDataArray.child("binary").child_value();
 			vector<float> binaryData = base64::decode_base64(
-				binaryDataStr, precision / 8, false, false);
+				binaryDataStr, precision / 8, false, decompress);
 
 			if (attr.count("time array"))
 			{
@@ -513,11 +523,21 @@ void mzSample::parseMzMLSpectrumList(const xml_node &spectrumList)
 			if (attr.count("32-bit float"))
 				precision = 32;
 
+			bool decompress = false;
+#ifdef ZLIB
+			// if the data is been compressed in zlib format this part will
+			// take care.
+			if (attr.count("zlib compression"))
+			{
+				decompress = true;
+			}
+#endif
+
 			string binaryDataStr = binaryDataArray.child("binary").child_value();
 			if (!binaryDataStr.empty())
 			{
 				vector<float> binaryData = base64::decode_base64(
-					binaryDataStr, precision / 8, false, false);
+					binaryDataStr, precision / 8, false, decompress);
 				if (attr.count("m/z array"))
 				{
 					mzVector = binaryData;

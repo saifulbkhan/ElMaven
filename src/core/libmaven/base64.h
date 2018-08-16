@@ -32,7 +32,7 @@ namespace base64 {
     /**
      * @return TRUE if 'c' is a valid base64 character, otherwise FALSE
      */
-    int is_base64(char c);
+    bool is_base64(unsigned char c);
 
     /**
      * [Decode a base64 string]
@@ -75,9 +75,9 @@ namespace base64 {
                     (uint64_t)swapbytes((uint32_t)(x >> 32))));
     }
 
-    void decompressString(char** dest, int& size, int float_size);
+    void decompressString(const string &str, char** dest, int& size, int float_size);
 
-    char* decodeString(const string& src);
+    string decodeString(const string& src);
     vector<float> convertDecodedDataBackToFloat(unsigned char* dest,
             int float_size,
             bool neworkorder,
