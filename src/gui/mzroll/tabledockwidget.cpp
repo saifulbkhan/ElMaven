@@ -21,6 +21,7 @@ TableDockWidget::TableDockWidget(MainWindow *mw) {
   treeWidget->setObjectName("PeakGroupTable");
   treeWidget->setFocusPolicy(Qt::NoFocus);
   treeWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+  _lastSelection = nullptr;
   this->setFocusPolicy(Qt::ClickFocus);
   tableSelectionFlagUp = false;
   tableSelectionFlagDown = false;
@@ -33,8 +34,8 @@ TableDockWidget::TableDockWidget(MainWindow *mw) {
   connect(traindialog->saveButton, SIGNAL(clicked(bool)), SLOT(saveModel()));
   connect(traindialog->trainButton, SIGNAL(clicked(bool)), SLOT(Train()));
   connect(treeWidget,
-          SIGNAL(itemClicked(QTreeWidgetItem *, int)),
-          SLOT(showSelectedGroup()));
+          SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+          SLOT(_onItemClicked(QTreeWidgetItem*)));
   connect(treeWidget,
           SIGNAL(itemSelectionChanged()),
           SLOT(showSelectedGroup()));
@@ -759,17 +760,13 @@ void TableDockWidget::showSelectedGroup() {
   if (group != NULL && _mainwindow != NULL) {
     _mainwindow->setPeakGroup(group);
   }
+}
 
-  if (item->childCount() > 0) {
-    vector<PeakGroup *> children;
-    for (int i = 0; i < item->childCount(); i++) {
-      QTreeWidgetItem *child = item->child(i);
-      QVariant data = child->data(0, Qt::UserRole);
-      PeakGroup *group = data.value<PeakGroup *>();
-      if (group)
-        children.push_back(group);
-    }
-  }
+void TableDockWidget::_onItemClicked(QTreeWidgetItem *item)
+{
+  if (item == _lastSelection)
+    showSelectedGroup();
+  _lastSelection = item;
 }
 
 QList<PeakGroup *> TableDockWidget::getSelectedGroups() {

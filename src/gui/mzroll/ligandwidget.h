@@ -104,6 +104,14 @@ private Q_SLOTS:
     void fetchRemoteCompounds();
     QList<Compound*> parseXMLRemoteCompounds();
 
+    /**
+     * @brief This slot is called whenever an item is clicked but, it activates
+     * the item only if it was the last selected item. So as to force the selected
+     * group to show itself when focus comes back into the tree-widget.
+     * @param item The tree-widget item that was clicked.
+     */
+    void _onItemClicked(QTreeWidgetItem* item);
+
 private:
 
     QTreeWidget *treeWidget;
@@ -126,7 +134,7 @@ private:
 
     int connectionId;
     QXmlStreamReader xml;
-
+    QTreeWidgetItem* _lastSelection;
 };
 
 #endif

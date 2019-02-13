@@ -3134,7 +3134,7 @@ void MainWindow::setPeakGroup(PeakGroup* group) {
 		((ScatterPlot*) scatterDockWidget)->showSimilar(group);
 	}
 
-    if (group->peaks.size() > 0) {
+    if (spectraWidget->isVisible() && group->peaks.size() > 0) {
         vector<Scan*>scanset = group->getRepresentativeFullScans(); //TODO: Sahil-Kiran, Added while merging mainwindow
         spectraWidget->setScanSet(scanset); //TODO: Sahil-Kiran, Added while merging mainwindow
         spectraWidget->replot(); //TODO: Sahil-Kiran, Added while merging mainwindow

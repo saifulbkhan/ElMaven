@@ -19,8 +19,10 @@ LigandWidget::LigandWidget(MainWindow* mw) {
   treeWidget->setHeaderHidden(false);
   treeWidget->setObjectName("CompoundTable");
   treeWidget->setDragDropMode(QAbstractItemView::DragOnly);
-
-  connect(treeWidget,SIGNAL(itemClicked(QTreeWidgetItem*, int)), SLOT(showLigand()));
+  _lastSelection = nullptr;
+  connect(treeWidget,
+          SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+          SLOT(_onItemClicked(QTreeWidgetItem*)));
   connect(treeWidget,SIGNAL(itemSelectionChanged()), SLOT(showLigand()));
 
   QToolBar *toolBar = new QToolBar(this);
@@ -557,9 +559,16 @@ void LigandWidget::showLigand() {
             Compound*  c =  v.value<Compound*>();
             if (c)  _mw->setCompoundFocus(c);
 			if (c)   matchFragmentation();
-
     }
 }
+
+void LigandWidget::_onItemClicked(QTreeWidgetItem *item)
+{
+    if (item == _lastSelection)
+        showLigand();
+    _lastSelection = item;
+}
+
 void LigandWidget::fetchRemoteCompounds()
 {
     qDebug() << "fetchRemoteCompounds()";
