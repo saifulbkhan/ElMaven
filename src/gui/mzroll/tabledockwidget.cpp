@@ -2059,6 +2059,27 @@ QWidget *TableToolBarWidgetAction::createWidget(QWidget *parent) {
     connect(btnPDF, SIGNAL(clicked()), td, SLOT(printPdfReport()));
     connect(btnPDF, SIGNAL(clicked()), td, SLOT(showNotification()));
     return btnPDF;
+  } else if (btnName == "btnMSP") {
+
+    QToolButton *btnMSP = new QToolButton(parent);
+    btnMSP->setIcon(QIcon(rsrcPath + "/exportMSP.png"));
+    btnMSP->setToolTip("Generate Spectral Library");
+    connect(btnMSP,
+            &QToolButton::clicked,
+            td,
+            [&] {
+                QString fileName =
+                    QFileDialog::getSaveFileName(td,
+                                                 tr("Export Spectral Library"),
+                                                 "",
+                                                 tr("NIST library (*.msp)"));
+                if (!fileName.endsWith(".msp"))
+                    fileName += ".msp";
+                DB.saveNISTLibrary(td->getGroups().toVector().toStdVector(),
+                                   td->getMainWindow()->getUserMassCutoff(),
+                                   fileName.toStdString());
+            });
+    return btnMSP;
   } else if (btnName == "btnX") {
 
     QToolButton *btnX = new QToolButton(parent);
@@ -2110,6 +2131,7 @@ PeakTableDockWidget::PeakTableDockWidget(MainWindow *mw, const int peakTableId)
   QWidgetAction *btnHeatmapelete =
       new TableToolBarWidgetAction(toolBar, this, "btnHeatmapelete");
   QWidgetAction *btnPDF = new TableToolBarWidgetAction(toolBar, this, "btnPDF");
+  QWidgetAction *btnMSP = new TableToolBarWidgetAction(toolBar, this, "btnMSP");
   QWidgetAction *btnX = new TableToolBarWidgetAction(toolBar, this, "btnX");
   QWidgetAction *btnMin = new TableToolBarWidgetAction(toolBar, this, "btnMin");
 
@@ -2131,6 +2153,7 @@ PeakTableDockWidget::PeakTableDockWidget(MainWindow *mw, const int peakTableId)
   toolBar->addAction(btnPDF);
   toolBar->addAction(btnGroupCSV);
   toolBar->addAction(btnSaveJson);
+  toolBar->addAction(btnMSP);
   toolBar->addWidget(spacer);
   toolBar->addAction(btnMin);
   toolBar->addAction(btnX);
@@ -2205,6 +2228,7 @@ BookmarkTableDockWidget::BookmarkTableDockWidget(MainWindow *mw) : TableDockWidg
   QWidgetAction *btnHeatmapelete =
       new TableToolBarWidgetAction(toolBar, this, "btnHeatmapelete");
   QWidgetAction *btnPDF = new TableToolBarWidgetAction(toolBar, this, "btnPDF");
+  QWidgetAction *btnMSP = new TableToolBarWidgetAction(toolBar, this, "btnMSP");
   QWidgetAction *btnX = new TableToolBarWidgetAction(toolBar, this, "btnX");
   QWidgetAction *btnMin = new TableToolBarWidgetAction(toolBar, this, "btnMin");
 
@@ -2227,6 +2251,7 @@ BookmarkTableDockWidget::BookmarkTableDockWidget(MainWindow *mw) : TableDockWidg
   toolBar->addAction(btnPDF);
   toolBar->addAction(btnGroupCSV);
   toolBar->addAction(btnSaveJson);
+  toolBar->addAction(btnMSP);
   toolBar->addWidget(spacer);
   toolBar->addAction(btnMin);
 
