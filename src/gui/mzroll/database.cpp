@@ -572,6 +572,7 @@ int Database::saveNISTLibrary(vector<PeakGroup*> groups,
         if (signal)
             (*signal)("Saving spectral library: " + filepath, written, count);
 
+        fstream << fixed << setprecision(6);
         if (group->compound != nullptr) {
             fstream << "NAME: " << group->compound->name << "\n";
             fstream << "MW: " << group->compound->mass << "\n";
@@ -583,8 +584,8 @@ int Database::saveNISTLibrary(vector<PeakGroup*> groups,
                     << "\n";
         }
 
-        fstream << "RT: " << group->meanRt << "\n";
-        fstream << "PRECURSORMZ: " << group->meanMz << "\n";
+        fstream << setprecision(3) << "RT: " << group->meanRt << "\n";
+        fstream << setprecision(6) << "PRECURSORMZ: " << group->meanMz << "\n";
 
         if (group->compound != nullptr) {
             fstream << "SMILE: " << group->compound->smileString << "\n";
