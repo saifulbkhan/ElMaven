@@ -264,6 +264,16 @@ class EIC
                                         double minSignalBaselineDifference,
                                         float fragmentPpmTolerance,
                                         string scoringAlgo);
+
+    static vector<PeakGroup> groupPeaksB(vector<EIC*>& eics,
+                                         mzSlice* slice,
+                                         int smoothingWindow,
+                                         float maxRtDiff,
+                                         float minQuality,
+                                         float minSignalBaselineDifference,
+                                         float fragmentPpmTolerance,
+                                         string scoringAlgo);
+
     /**
          * [eicMerge ]
          * @method eicMerge

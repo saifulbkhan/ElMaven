@@ -77,18 +77,14 @@ void EICLogic::groupPeaks(float eic_smoothingWindow,
                           float productPpmTolerance,
                           string scoringAlgo)
 {
-    peakgroups = EIC::groupPeaks(eics,
-                                slice,
-                                eic_smoothingWindow,
-                                grouping_maxRtWindow,
-                                minQuality,
-                                distXWeight,
-                                distYWeight,
-                                overlapWeight,
-                                useOverlap,
-                                minSignalBaselineDifference,
-                                productPpmTolerance,
-                                scoringAlgo);
+    peakgroups = EIC::groupPeaksB(eics,
+                                  slice,
+                                  eic_smoothingWindow,
+                                  grouping_maxRtWindow,
+                                  minQuality,
+                                  minSignalBaselineDifference,
+                                  productPpmTolerance,
+                                  scoringAlgo);
 
 
     //keep only top X groups ( ranked by intensity )

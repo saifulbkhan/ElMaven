@@ -1038,6 +1038,404 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC *> &eics,
     return (pgroups);
 }
 
+vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics,
+                                   mzSlice* slice,
+                                   int smoothingWindow,
+                                   float maxRtDiff,
+                                   float minQuality,
+                                   float minSignalBaselineDifference,
+                                   float fragmentPpmTolerance,
+                                   string scoringAlgo)
+{
+    bool debug = false;
+
+    // vector filled and returned by this method
+    vector<PeakGroup> peakgroups;
+
+    // case with empty eics
+    if (eics.empty())
+        return peakgroups;
+
+    // case there is only a single EIC, there is nothing to group
+    if (eics.size() == 1 && eics.at(0)) {
+        auto onlyEic = eics.at(0);
+        for (size_t i = 0; i < onlyEic->peaks.size(); ++i) {
+            PeakGroup group;
+            group.groupId = static_cast<int>(i);
+            group.minQuality = minQuality;
+            group.setSlice(*slice);
+            group.addPeak(onlyEic->peaks.at(i));
+            group.groupStatistics();
+            group.computeAvgBlankArea(eics);
+            if (group.getFragmentationEvents().size()) {
+                group.computeFragPattern(fragmentPpmTolerance);
+                group.matchFragmentation(fragmentPpmTolerance, scoringAlgo);
+            }
+            peakgroups.push_back(group);
+        }
+        if (debug) {
+            cerr << "Case with one EIC produced "
+                 << peakgroups.size()
+                 << "peak groups"
+                 << endl;
+        }
+        return peakgroups;
+    }
+
+    int numTotalPeaks = 0;
+    for (auto eic : eics) {
+        eic->setFilterSignalBaselineDiff(minSignalBaselineDifference);
+        eic->getPeakPositions(smoothingWindow);
+        numTotalPeaks += eic->peaks.size();
+    }
+
+    if (debug) {
+        cerr << "Discovered "
+             << numTotalPeaks
+             << " peaks in "
+             << eics.size()
+             << " samples"
+             << endl;
+    }
+
+    // pairs of eic and peaks
+    vector<pair<size_t, Peak>> peakSamplePairs;
+    for (auto eic : eics) {
+        for (auto peak : eic->peaks) {
+            peakSamplePairs.push_back(make_pair(eic->sample->getSampleId(),
+                                                peak));
+        }
+    }
+    sort(begin(peakSamplePairs),
+         end(peakSamplePairs),
+         [] (const pair<size_t, Peak>& lhs, const pair<size_t, Peak>& rhs) {
+             return (lhs.second.rt - rhs.second.rt) < 0;
+         });
+
+    vector<pair<double, pair<size_t, size_t>>> dissimilarities;
+    for (size_t i = 0; i < peakSamplePairs.size(); ++i) {
+        auto firstPeakPair = peakSamplePairs.at(i);
+        for (size_t j = i+1; j < peakSamplePairs.size(); ++j) {
+            auto secondPeakPair = peakSamplePairs.at(j);
+
+            // skip peaks from the same sample
+            if (firstPeakPair.first == secondPeakPair.first)
+                continue;
+
+            // out of tolerance condition
+            float deltaRt = abs(firstPeakPair.second.rt
+                                - secondPeakPair.second.rt);
+            if (deltaRt > maxRtDiff)
+                continue;
+
+            // create a pair
+            dissimilarities.push_back(make_pair(deltaRt, make_pair(i, j)));
+        }
+    }
+
+    if (debug) {
+        cerr << "Computed "
+             << dissimilarities.size()
+             << " dissimilarities"
+             << endl;
+    }
+
+    sort(dissimilarities.begin(),
+         dissimilarities.end(),
+         [] (const pair<double, pair<size_t, size_t>>& lhs,
+             const pair<double, pair<size_t, size_t>>& rhs) {
+             if (mzUtils::almostEqual(lhs.first, rhs.first)) {
+                 if (lhs.second.first == rhs.second.first) {
+                     return lhs.second.second < rhs.second.second;
+                 } else {
+                     return lhs.second.first < rhs.second.first;
+                 }
+             } else {
+                 return lhs.first < rhs.first;
+             }
+         });
+
+    if (debug) {
+        cerr << "Dissimilarities: " << endl;
+        for (auto diss : dissimilarities) {
+            cerr << "("
+                 << diss.second.first
+                 << ", "
+                 << diss.second.second
+                 << "): "
+                 << diss.first
+                 << endl;
+        }
+    }
+
+    // initially, all peaks start in their own clusters
+    vector<vector<size_t>> groupClusters(peakSamplePairs.size());
+    for (size_t i = 0; i < peakSamplePairs.size(); ++i){
+        groupClusters.at(i) = {i};
+    }
+
+    if (debug) {
+        cerr << endl;
+        cerr << "Group clusters initial status:" << endl;
+        for (auto cluster : groupClusters) {
+            if (cluster.empty()) continue;
+            cerr << "cluster indexes: ";
+            for (auto index : cluster)
+                cerr << index << " ";
+            cerr << endl;
+        }
+    }
+
+    int counter = 0;
+    for (auto dissimilarity : dissimilarities) {
+        if (debug) {
+            cerr << "***********************" << endl;
+            cerr << "Iteration " << counter << endl;
+            counter++;
+        }
+
+        // refers to index (sample ID) stored in peakSamplePairs
+        size_t firstPeakPairIndex = dissimilarity.second.first;
+        size_t secondPeakPairIndex = dissimilarity.second.second;
+
+        // refers to index stored in groupClusters
+        int firstContainingClusterIndex = -1;
+        int secondContainingClusterIndex = -1;
+
+        // check existing clusters for peak indexes
+        for (size_t i = 0; i < groupClusters.size(); ++i) {
+            auto cluster = groupClusters.at(i);
+
+            if (cluster.empty())
+                continue;
+
+            for (auto& peakPair : cluster) {
+                if (peakPair == firstPeakPairIndex)
+                    firstContainingClusterIndex = static_cast<int>(i);
+                if (peakPair == secondPeakPairIndex)
+                    secondContainingClusterIndex = static_cast<int>(i);
+            }
+
+            if (firstContainingClusterIndex != -1
+                && secondContainingClusterIndex != -1) {
+                // we found peaks that should be paired
+                break;
+            }
+        }
+
+        if (debug) {
+            cerr << "Found cluster indexes: ("
+                 << firstContainingClusterIndex
+                 << ", "
+                 << secondContainingClusterIndex
+                 << ")"
+                 << endl;
+        }
+
+        /*
+         * Based on clusters retrieved, and samples already present, either
+         *
+         * 1. accept (i,j) pair by merging a peak to an existing cluster,
+         * 2. accept (i,j) pair by merging two existing clusters together,
+         * 3. accept (i,j) pair by creating a new cluster only if i and j are
+         *    not involved in any existing clusters or
+         * 4. reject (i,j) pair if the merge would involve multiple peaks from
+         *    the same sample joining a cluster.
+         *
+         * In the case of merging, groupClusters vector is updated
+         * appropriately. The correctness of this technique should extensively
+         * tested.
+         *
+         * Meanwhile, is this even the issue? What exactly is happening here?
+         */
+
+        if ((firstContainingClusterIndex != -1)
+            && (secondContainingClusterIndex != -1)
+            && (firstContainingClusterIndex != secondContainingClusterIndex)) {
+            // both the first and second peaks are already involved in clusters,
+            // if the clusters are different, merge the clusters together,
+            // if the clusters are the same, they are already merged
+
+            auto firstContainingCluster =
+                groupClusters.at(firstContainingClusterIndex);
+            auto secondContainingCluster =
+                groupClusters.at(secondContainingClusterIndex);
+
+            if (debug) {
+                cerr << "Merging clusters:" << endl;
+                cerr << "first cluster ->";
+                for (auto index : firstContainingCluster)
+                    cerr << " " << index;
+                cerr << endl;
+                cerr << "second cluster ->";
+                for (auto index : secondContainingCluster)
+                    cerr << " " << index;
+                cerr << endl;
+            }
+
+            // check to see if merging the two clusters would lead to a cluster
+            // with duplicate sample IDs
+            vector<size_t> intersection;
+            vector<size_t> firstContainingClusterSamples;
+            vector<size_t> secondContainingClusterSamples;
+            for (auto index : firstContainingCluster) {
+              firstContainingClusterSamples.push_back(
+                  peakSamplePairs.at(index).first);
+            }
+            for (auto index : secondContainingCluster) {
+                secondContainingClusterSamples.push_back(
+                    peakSamplePairs.at(index).first);
+            }
+            sort(begin(firstContainingClusterSamples),
+                 end(firstContainingClusterSamples));
+            sort(begin(secondContainingClusterSamples),
+                 end(secondContainingClusterSamples));
+            set_intersection(begin(firstContainingClusterSamples),
+                             end(firstContainingClusterSamples),
+                             begin(secondContainingClusterSamples),
+                             end(secondContainingClusterSamples),
+                             back_inserter(intersection));
+
+            if (intersection.empty()) {
+                // merge will not lead to multiple peaks from the same sample
+                firstContainingCluster.insert(end(firstContainingCluster),
+                                              begin(secondContainingCluster),
+                                              end(secondContainingCluster));
+
+                secondContainingCluster.clear();
+                secondContainingCluster.shrink_to_fit();
+
+                groupClusters.at(firstContainingClusterIndex) =
+                    firstContainingCluster;
+                groupClusters.at(secondContainingClusterIndex) =
+                    secondContainingCluster;
+            } else if (debug) {
+                cerr << "Peak with sample already exists, not updating cluster"
+                     << endl;
+            }
+
+            if (debug) {
+                cerr << "Updated first cluster to: ";
+                for (auto index : groupClusters.at(firstContainingClusterIndex))
+                    cerr << " " << index;
+                cerr << endl;
+
+                cerr << "Updated second cluster to: ";
+                for (auto index : groupClusters.at(secondContainingClusterIndex))
+                    cerr << " " << index;
+                cerr << endl;
+            }
+        } else if (firstContainingClusterIndex != -1
+                   && secondContainingClusterIndex == -1) {
+            // only the first peak is involved in a cluster already, second peak
+            // joins the first cluster
+
+            auto firstContainingCluster =
+                groupClusters.at(firstContainingClusterIndex);
+
+            if (debug) {
+                cerr << "Joining second peak with first clusters:" << endl;
+                cerr << "first cluster ->";
+                for (auto index : firstContainingCluster)
+                    cerr << " " << index;
+                cerr << endl;
+            }
+
+            firstContainingCluster.push_back(secondPeakPairIndex);
+            groupClusters.at(firstContainingClusterIndex) =
+                firstContainingCluster;
+
+            if (debug) {
+                cerr << "Updated first cluster to: ";
+                for (auto index : groupClusters.at(firstContainingClusterIndex))
+                    cerr << " " << index;
+                cerr << endl;
+            }
+        } else if (firstContainingClusterIndex == -1
+                   && secondContainingClusterIndex != -1) {
+            // only the second peak is involved in a cluster already, first peak
+            // joins second cluster
+
+            auto secondContainingCluster =
+                groupClusters.at(secondContainingClusterIndex);
+
+            if (debug) {
+                cerr << "Joining first peak with second clusters:" << endl;
+                cerr << "second cluster ->";
+                for (auto index : secondContainingCluster)
+                    cerr << " " << index;
+                cerr << endl;
+            }
+
+            secondContainingCluster.push_back(firstPeakPairIndex);
+            groupClusters.at(secondContainingClusterIndex) =
+                secondContainingCluster;
+
+            if (debug) {
+                cerr << "Updated second cluster to: ";
+                for (auto index : groupClusters.at(secondContainingClusterIndex))
+                    cerr << " " << index;
+                cerr << endl;
+            }
+        } else if (firstContainingClusterIndex == -1
+                   && secondContainingClusterIndex == -1){
+            // both the first and second peak are not part of any extant
+            // cluster, they merge together to create a new cluster
+
+            if (debug) {
+                cerr << "Creating a new cluster" << endl;
+            }
+
+            //no existing clusters involving i or j - add a new cluster
+            vector<size_t> newCluster = {
+                firstPeakPairIndex,
+                secondPeakPairIndex
+            };
+            groupClusters.push_back(newCluster);
+        }
+    }
+
+    if (debug) {
+        cerr << endl;
+        cerr << "Group clusters status:" << endl;
+        for (auto cluster : groupClusters) {
+            if (cluster.empty()) continue;
+            cerr << "cluster indexes: ";
+            for (auto index : cluster)
+                cerr << index << " ";
+            cerr << endl;
+        }
+    }
+
+    // translate results and return
+    for (size_t i = 0; i < groupClusters.size(); ++i) {
+        auto& cluster = groupClusters.at(i);
+        if (cluster.empty())
+            continue;
+
+        PeakGroup group;
+        group.groupId = static_cast<int>(i);
+        group.minQuality = minQuality;
+        group.setSlice(*slice);
+        for (auto peakPairIndex : cluster)
+            group.addPeak(peakSamplePairs.at(peakPairIndex).second);
+
+        group.groupStatistics();
+        group.computeAvgBlankArea(eics);
+        if (group.getFragmentationEvents().size()) {
+            group.computeFragPattern(fragmentPpmTolerance);
+            group.matchFragmentation(fragmentPpmTolerance, scoringAlgo);
+        }
+        peakgroups.push_back(group);
+    }
+
+    if (debug) {
+        cerr << "Returning " << peakgroups.size() << " peak groups" << endl;
+    }
+
+    return(peakgroups);
+}
+
 void EIC::interpolate()
 {
     // Merged to 776
