@@ -254,8 +254,8 @@ void PeakGroup::deletePeaks() {
 }
 
 bool PeakGroup::deletePeak(unsigned int index) {
-    if ( index < children.size() ) {
-        peaks.erase(peaks.begin()+index);
+    if (index < peaks.size()) {
+        peaks.erase(peaks.begin() + index);
         return true;
     }
     return false;
