@@ -974,6 +974,42 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC *> &eics,
         }
     }
 
+    // lambda to find indices of peaks that are common among the two groups
+    auto findAndDeleteCommonPeaks = [](PeakGroup& firstGroup,
+                              PeakGroup& secondGroup) {
+        for (size_t i = 0; i < firstGroup.peaks.size(); ++i) {
+            auto& firstPeak = firstGroup.peaks[i];
+            for (size_t j = 0; j < secondGroup.peaks.size(); ++j) {
+                auto& secondPeak = secondGroup.peaks[j];
+                // these three conditions should be enough to declare duplicate
+                if ((firstPeak.getSample() == secondPeak.getSample())
+                    && (mzUtils::almostEqual(firstPeak.rt, secondPeak.rt))
+                    && (mzUtils::almostEqual(firstPeak.peakMz,
+                                             secondPeak.peakMz))) {
+                    if (firstPeak.groupOverlap >= secondPeak.groupOverlap) {
+                        secondGroup.deletePeak(j);
+                        --j;
+                    } else {
+                        firstGroup.deletePeak(i);
+                        --i;
+                        break;
+                    }
+                }
+            }
+        }
+    };
+
+    // make sure that for this EIC, none of the peaks are shared across more
+    // than one group
+    for (auto& firstGroup : peakgroups) {
+        for (auto& secondGroup : peakgroups) {
+            if (&firstGroup == &secondGroup)
+                continue;
+
+            findAndDeleteCommonPeaks(firstGroup, secondGroup);
+        }
+    }
+
     // erase groups that have no peaks
     peakgroups.erase(std::remove_if(peakgroups.begin(),
                                     peakgroups.end(),
