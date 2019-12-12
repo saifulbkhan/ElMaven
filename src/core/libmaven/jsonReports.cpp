@@ -15,8 +15,8 @@
 using json = nlohmann::json;
 
 
-JSONReports::JSONReports(MavenParameters* mp, bool pollyUpload):
-    _uploadToPolly(pollyUpload), _mavenParameters(mp){}
+JSONReports::JSONReports(MavenParameters* mp):
+    _mavenParameters(mp){}
 
 void JSONReports::_writeGroup(PeakGroup& grp, ofstream& filename)
 {
@@ -37,11 +37,6 @@ void JSONReports::_writeGroup(PeakGroup& grp, ofstream& filename)
     filename << "\"";
     if (label == 'g' || label == 'b') filename << label;
     filename << "\"";
-
-    if(_uploadToPolly) {
-        int mlLabel =  (grp.markedGoodByCloudModel) ? 1 : (grp.markedBadByCloudModel) ? -1 : 0;
-        filename  << ",\n" << "\"ml-label\": " << mlLabel;
-    }
 
     filename << ",\n" << "\"metaGroupId\": " << grp.metaGroupId ;
     filename << ",\n" << "\"meanMz\": " << grp.meanMz  ;
@@ -451,7 +446,7 @@ TEST_CASE_FIXTURE(JsonReportsFixture,"Test writing to the JSON file")
 {
 
     string jsonFilename = "test.json";
-    JSONReports* jsonReports = new JSONReports(mavenparameters(), false);
+    JSONReports* jsonReports = new JSONReports(mavenparameters());
     auto samplesUsed = samples();
     sort(begin(samplesUsed), end(samplesUsed), mzSample::compSampleSort);
     jsonReports->save(jsonFilename, allgroups(), samplesUsed);
