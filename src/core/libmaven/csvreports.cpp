@@ -458,47 +458,6 @@ void CSVReports::_writePeakInfo(PeakGroup* group)
     }
 }
 
-void CSVReports::writeDataForPolly(const std::string& file,
-                                   std::list<PeakGroup> groups)
-{
-    _reportStream.open(file.c_str(), ios::out);
-    if (_reportStream.is_open()) {
-        _reportStream << "labelML"
-                      << ","
-                      << "isotopeLabel"
-                      << ","
-                      << "compound";
-        _reportStream << endl;
-
-        for (auto grp : groups) {
-            for (auto child : grp.children) {
-                int mlLabel = (child.markedGoodByCloudModel)
-                                  ? 1
-                                  : (child.markedBadByCloudModel) ? 0 : -1;
-                _reportStream << mlLabel;
-                _reportStream << ",";
-
-                string tagString = child.srmId + child.tagString;
-                tagString = _sanitizeString(tagString.c_str()).toStdString();
-                _reportStream << tagString;
-                _reportStream << ",";
-
-                string compoundName = "";
-                if (child.getCompound() != NULL)
-                    compoundName =
-                        _sanitizeString(child.getCompound()->name.c_str())
-                            .toStdString();
-                else
-                    compoundName = std::to_string(child.meanMz) + "@"
-                                   + std::to_string(child.meanRt);
-                _reportStream << compoundName;
-                _reportStream << endl;
-            }
-        }
-    }
-    _reportStream.close();
-}
-
 bool CSVReports::writeDataForPeakMl(const string& filePath,
                                     const vector<PeakGroup>& groups)
 {
@@ -894,68 +853,6 @@ TEST_CASE_FIXTURE(CSVReportFixture, "Testing Targeted Groups")
         inputPeakFile.close();
         savedPeakFile.close();
         remove("peakReport.csv");
-    }
-
-    SUBCASE("Testing write for polly")
-    {
-        targetedGroup();
-        string pollyFile = "polly.csv";
-        auto sample = samples();
-        auto mavenparameter = mavenparameters();
-        CSVReports* csvReports =
-            new CSVReports(pollyFile,
-                           CSVReports::ReportType::PollyReport,
-                           sample,
-                           PeakGroup::AreaTop,
-                           false,
-                           true,
-                           mavenparameter);
-        std::list<PeakGroup> group = isotopeGroup();
-        csvReports->writeDataForPolly(pollyFile, group);
-
-        ifstream inputPeakFile("polly.csv");
-        ifstream savedPeakFile("tests/test-libmaven/test_polly.csv");
-
-        string headerInput;
-        getline(inputPeakFile, headerInput);
-        string headerSaved;
-        getline(savedPeakFile, headerSaved);
-
-        int cnt = 0;
-        while (!inputPeakFile.eof()) {
-            cnt++;
-            string input;
-            getline(inputPeakFile, input);
-
-            if (input.size() > 0) {
-                vector<string> inputValues;
-                mzUtils::splitNew(input, ",", inputValues);
-
-                if (cnt > 1) {
-                    savedPeakFile.clear();
-                    savedPeakFile.seekg(0, ios::beg);
-                    string headerSaved;
-                    getline(savedPeakFile, headerSaved);
-                }
-
-                while (!savedPeakFile.eof()) {
-                    string saved;
-                    getline(savedPeakFile, saved);
-                    vector<string> savedValues;
-                    mzUtils::splitNew(saved, ",", savedValues);
-
-                    if (inputValues[1] == savedValues[1]
-                        && inputValues[2] == savedValues[2]) {
-                        for (size_t i = 0; i < inputValues.size(); i++)
-                            REQUIRE(inputValues[i] == savedValues[i]);
-                        break;
-                    }
-                }
-            }
-        }
-        inputPeakFile.close();
-        savedPeakFile.close();
-        remove("polly.csv");
     }
 
     SUBCASE("Testing Untargeted Group File")
