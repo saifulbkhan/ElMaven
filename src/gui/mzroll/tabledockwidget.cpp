@@ -272,10 +272,19 @@ void TableDockWidget::updateItem(QTreeWidgetItem *item, bool updateChildren) {
   }
   item->setBackground(0, brush);
 
-  if (group->label == 'g') {
+  if (group->label == 'g'
+      || group->predictedLabel == PeakGroup::ClassifiedLabel::Signal) {
     item->setIcon(0, QIcon(":/images/good.png"));
-  } else if (group->label == 'b') {
+  } else if (group->label == 'b'
+             || group->predictedLabel == PeakGroup::ClassifiedLabel::Noise) {
     item->setIcon(0, QIcon(":/images/bad.png"));
+  } else if (group->predictedLabel == PeakGroup::ClassifiedLabel::Correlated) {
+    item->setIcon(0, QIcon(":/images/moi_correlated.png"));
+  } else if (group->predictedLabel == PeakGroup::ClassifiedLabel::Pattern) {
+    item->setIcon(0, QIcon(":/images/moi_pattern.png"));
+  } else if (group->predictedLabel
+             == PeakGroup::ClassifiedLabel::CorrelatedAndPattern) {
+    item->setIcon(0, QIcon(":/images/moi_pattern_correlated.png"));
   } else {
     item->setIcon(0, QIcon());
   }
@@ -2826,7 +2835,7 @@ void TableDockWidget::validateGroup(PeakGroup* grp, QTreeWidgetItem* item)
             if (mark!=-1) mark=1;
             else decisionConflict=true;
         }
-        else if (grp->predictedLabel==1) {
+        else if (grp->predictedLabel == PeakGroup::ClassifiedLabel::Signal) {
             if (grp->avgPeakQuality > 0.76) {
                 if (mark!=-1) mark=1;
                 else decisionConflict=true;   
@@ -2837,7 +2846,9 @@ void TableDockWidget::validateGroup(PeakGroup* grp, QTreeWidgetItem* item)
                 else decisionConflict=true;
             }
         }
-        else if (grp->predictedLabel==0 && grp->avgPeakQuality > 0.72 && grp->weightedAvgPeakQuality > 0.76) {
+        else if (grp->predictedLabel == PeakGroup::ClassifiedLabel::None
+                 && grp->avgPeakQuality > 0.72
+                 && grp->weightedAvgPeakQuality > 0.76) {
             if (mark!=-1) mark=1;
             else decisionConflict=true;
         }
@@ -2848,7 +2859,7 @@ void TableDockWidget::validateGroup(PeakGroup* grp, QTreeWidgetItem* item)
             else decisionConflict=true;
         }
 
-        if (grp->predictedLabel==-1) {
+        if (grp->predictedLabel == PeakGroup::ClassifiedLabel::Noise) {
             if (grp->avgPeakQuality < 0.29) {
                 if (mark!=1) mark=-1;
                 else decisionConflict=true;

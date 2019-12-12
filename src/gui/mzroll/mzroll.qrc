@@ -113,5 +113,8 @@
         <file>images/toleranceSyncUnlock.png</file>
         <file>images/support.png</file>
         <file>images/exportMetadataTemplate.png</file>
+        <file>images/moi_correlated.png</file>
+        <file>images/moi_pattern_correlated.png</file>
+        <file>images/moi_pattern.png</file>
     </qresource>
 </RCC>
