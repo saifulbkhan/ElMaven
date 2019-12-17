@@ -236,12 +236,12 @@ void CSVReports::_writeGroupInfo(PeakGroup* group)
     _groupId++;
 
     char lab;
-    lab = group->label;
+    lab = group->userLabel();
 
     PeakGroup* parentGroup = group->getParent();
     if (parentGroup) {
-        if (group->label == '\0') {
-            lab = parentGroup->label;
+        if (group->userLabel() == '\0') {
+            lab = parentGroup->userLabel();
         }
     } else {
         parentGroup = group;
@@ -265,7 +265,7 @@ void CSVReports::_writeGroupInfo(PeakGroup* group)
     tagString = _sanitizeString(tagString.c_str()).toStdString();
 
     char label[2];
-    sprintf(label, "%c", group->label);
+    sprintf(label, "%c", group->userLabel());
 
     string adductName = "";
     if (group->getAdduct() != nullptr)
@@ -391,13 +391,13 @@ void CSVReports::_writePeakInfo(PeakGroup* group)
     }
 
     if (selectionFlag == 2) {
-        if (group->label != 'g')
+        if (group->userLabel() != 'g')
             return;
     } else if (selectionFlag == 3) {
-        if (group->label != 'b')
+        if (group->userLabel() != 'b')
             return;
     } else if (selectionFlag == 4) {
-        if (group->label == 'b')
+        if (group->userLabel() == 'b')
             return;
     }
 
