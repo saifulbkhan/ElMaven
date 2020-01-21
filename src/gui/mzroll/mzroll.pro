@@ -242,7 +242,8 @@ HEADERS += stable.h \
            $$top_srcdir/crashhandler/elmavexceptionhandler.h \
            videoplayer.h \
            isotopedialog.h \
-           adductwidget.h
+           adductwidget.h \
+           multiselectcombobox.h \
 
 
 SOURCES += mainwindow.cpp  \
@@ -317,7 +318,8 @@ SOURCES += mainwindow.cpp  \
            notificator.cpp \
            videoplayer.cpp \
            isotopedialog.cpp \
-           adductwidget.cpp
+           adductwidget.cpp \
+           multiselectcombobox.cpp \
 
 
 contains (DEFINES,EMBEDHTTPSERVER) {
