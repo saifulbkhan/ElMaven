@@ -139,6 +139,7 @@ win32 {
 INSTALLS += sources target
 
 FORMS = forms/settingsform.ui  \
+        forms/correlationtable.ui \
         forms/librarymanager.ui \
         forms/masscalcwidget.ui \
     #	forms/ligandwidget.ui \
@@ -244,7 +245,7 @@ HEADERS += stable.h \
            isotopedialog.h \
            adductwidget.h \
            multiselectcombobox.h \
-
+            correlationtable.h
 
 SOURCES += mainwindow.cpp  \
            database.cpp \
@@ -319,8 +320,8 @@ SOURCES += mainwindow.cpp  \
            videoplayer.cpp \
            isotopedialog.cpp \
            adductwidget.cpp \
-           multiselectcombobox.cpp \
-
+           multiselectcombobox.cpp  \
+           correlationtable.cpp
 
 contains (DEFINES,EMBEDHTTPSERVER) {
     SOURCES += remotespectrahandler.cpp
