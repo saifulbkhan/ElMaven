@@ -950,7 +950,7 @@ bool TableDockWidget::selectPeakGroup(PeakGroup *group)
   QTreeWidgetItemIterator it(treeWidget);
   while (*it) {
     QTreeWidgetItem *item = (*it);
-    QVariant v = item->data(0, Qt::UserRole);
+    QVariant v = item->data(1, Qt::UserRole);
     PeakGroup *currentGroup = v.value<PeakGroup *>();
     if (currentGroup == group) {
         treeWidget->setCurrentItem(item);
@@ -1276,7 +1276,7 @@ void TableDockWidget::deleteGroups() {
                                     });
                         if (childGroupIter != end(parentGroup->children)) {
                             auto& childGroup = *childGroupIter;
-                            child->setData(0,
+                            child->setData(1,
                                            Qt::UserRole,
                                            QVariant::fromValue(&childGroup));
                         }
